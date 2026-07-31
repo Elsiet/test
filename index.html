@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440" />
+  <title>Principal 资金管理系统 — 高保真交互稿</title>
+  <style>
+    :root {
+      --sidebar-bg: #1E2329;
+      --sidebar-active: #2D3748;
+      --sidebar-text: #A0AEC0;
+      --sidebar-text-active: #FFFFFF;
+      --page-bg: #F5F7FA;
+      --card-bg: #FFFFFF;
+      --primary: #2563EB;
+      --border: #E5E7EB;
+      --text-primary: #111827;
+      --text-secondary: #6B7280;
+      --success-bg: #DCFCE7; --success-text: #166534;
+      --warning-bg: #FEF9C3; --warning-text: #854D0E;
+      --error-bg: #FEE2E2; --error-text: #991B1B;
+      --info-bg: #DBEAFE; --info-text: #1E40AF;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+      background: var(--page-bg);
+      color: var(--text-primary);
+      font-size: 14px;
+      line-height: 1.5;
+      min-width: 1280px;
+    }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 220px; background: var(--sidebar-bg); padding: 16px 0; flex-shrink: 0; }
+    .sidebar-logo {
+      padding: 0 20px 20px; color: #fff; font-weight: 600; font-size: 13px;
+      border-bottom: 1px solid #374151; margin-bottom: 8px;
+    }
+    .nav-item { padding: 10px 20px; color: var(--sidebar-text); font-size: 13px; cursor: pointer; }
+    .nav-item.active { background: var(--sidebar-active); color: var(--sidebar-text-active); }
+    .nav-sub { padding-left: 36px; font-size: 12px; }
+    .main { flex: 1; padding: 24px 32px; min-width: 0; }
+    .breadcrumb { color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; white-space: nowrap; }
+    .breadcrumb span { color: var(--text-primary); font-weight: 500; }
+    .page-header { margin-bottom: 20px; }
+    .page-title { font-size: 20px; font-weight: 600; white-space: nowrap; }
+    .page-title .mono { font-weight: 600; }
+    .btn {
+      height: 32px; padding: 0 16px; border-radius: 6px; font-size: 14px;
+      border: 1px solid var(--border); background: #fff; cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .tag-info { background: var(--info-bg); color: var(--info-text); }
+    .detail-header-actions { margin-left: auto; display: flex; gap: 8px; flex-shrink: 0; }
+    .detail-alert {
+      margin-bottom: 16px; padding: 12px 16px; border-radius: 8px;
+      background: var(--warning-bg); border: 1px solid #FDE68A;
+      font-size: 13px; color: #854D0E; line-height: 1.5;
+    }
+    .summary-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 20px;
+    }
+    .summary-item label { font-size: 12px; color: var(--text-secondary); display: block; }
+    .summary-item .val { font-size: 14px; font-weight: 500; margin-top: 4px; }
+    .summary-item .val-lg { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .pipeline {
+      padding: 28px 20px 24px;
+      overflow-x: auto;
+      text-align: center;
+    }
+    .pipeline-inner {
+      display: inline-flex;
+      align-items: flex-start;
+      justify-content: center;
+      vertical-align: top;
+    }
+    .pipe-node {
+      width: 158px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .pipe-node.pipe-anchor { width: 158px; }
+    .pipe-circle {
+      width: 48px; height: 48px; border-radius: 50%; margin: 0 0 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 600;
+      border: 2px solid var(--border); background: #F9FAFB; color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+    .pipe-circle.done { background: var(--success-bg); border-color: #22C55E; color: var(--success-text); }
+    .pipe-circle.running { background: var(--warning-bg); border-color: #EAB308; color: var(--warning-text);
+      box-shadow: 0 0 0 4px rgba(234,179,8,0.2); }
+    .pipe-circle.pending { background: #F9FAFB; border-color: #D1D5DB; color: var(--text-secondary); }
+    .pipe-circle.failed { background: var(--error-bg); border-color: #EF4444; color: var(--error-text); }
+    .pipe-title { font-weight: 600; font-size: 12px; line-height: 1.4; min-height: 34px; width: 100%; padding: 0 4px; text-align: center; }
+    .pipe-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; line-height: 1.4; min-height: 40px; width: 100%; padding: 0 4px; text-align: center; }
+    .pipe-times { margin-top: 8px; width: 100%; padding: 0 4px; min-height: 58px; box-sizing: border-box; }
+    .pipe-time-row {
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 0 4px;
+      align-items: start;
+      font-size: 10px;
+      line-height: 1.35;
+      margin-bottom: 3px;
+      width: 100%;
+    }
+    .pipe-time-lbl { color: #9CA3AF; text-align: right; flex-shrink: 0; }
+    .pipe-time-val {
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+      word-break: break-all;
+      text-align: left;
+    }
+    .pipe-line {
+      width: 28px; height: 2px; background: #D1D5DB; flex-shrink: 0;
+      margin-top: 24px; align-self: flex-start;
+    }
+    .pipe-line.done { background: #22C55E; }
+    .subflow-header {
+      padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border); background: #FAFAFA;
+    }
+    .subflow-header h3 { font-size: 15px; font-weight: 600; }
+    .stl-timeline { padding: 16px 20px 16px 40px; }
+    .stl-timeline .tl-item { padding-bottom: 20px; }
+    .stl-timeline .tl-dot { top: 2px; }
+    .stl-timeline .tl-dot.active { border-color: var(--primary); background: var(--info-bg); }
+    .stl-timeline .tl-dot.pending { border-color: #D1D5DB; }
+    .stl-timeline .tl-name { font-weight: 500; }
+    .stl-timeline .tl-meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .stl-timeline .tl-ref { font-size: 12px; color: var(--primary); margin-top: 2px; font-family: ui-monospace, monospace; }
+    .progress-bar { height: 6px; background: #E5E7EB; border-radius: 3px; width: 72px; display: inline-block; vertical-align: middle; margin-right: 6px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--primary); border-radius: 3px; }
+    .progress-fill.done { background: #22C55E; }
+    .progress-fill.failed { background: #DC2626; }
+    .card {
+      background: var(--card-bg); border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid var(--border);
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+    .filters {
+      padding: 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;
+      border-bottom: 1px solid var(--border);
+    }
+    .field label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; white-space: nowrap; }
+    .field input, .field select {
+      height: 32px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; min-width: 130px;
+    }
+    table { width: 100%; border-collapse: collapse; table-layout: auto; }
+    th {
+      background: #F9FAFB; text-align: left; padding: 10px 16px; font-weight: 500;
+      font-size: 13px; color: var(--text-secondary); border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle;
+      white-space: nowrap;
+    }
+    tr:hover td { background: #F9FAFB; }
+    .mono { font-family: ui-monospace, monospace; font-size: 13px; }
+    .tag {
+      display: inline-block; height: 22px; line-height: 22px; padding: 0 8px;
+      border-radius: 4px; font-size: 12px; font-weight: 500; white-space: nowrap;
+    }
+    .tag-success { background: var(--success-bg); color: var(--success-text); }
+    .tag-warning { background: var(--warning-bg); color: var(--warning-text); }
+    .tag-error { background: var(--error-bg); color: var(--error-text); }
+    .link {
+      color: var(--primary); cursor: pointer; text-decoration: none;
+      white-space: nowrap; display: inline-block;
+    }
+    .col-action { width: 1%; text-align: center; }
+    .pagination {
+      padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
+      color: var(--text-secondary); font-size: 13px; white-space: nowrap;
+    }
+    .detail-header {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
+    }
+    .back-btn {
+      width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border);
+      background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary); font-size: 18px; flex-shrink: 0;
+    }
+    .card-title {
+      padding: 14px 20px; font-weight: 600; font-size: 15px;
+      border-bottom: 1px solid var(--border); background: #FAFAFA;
+    }
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      padding: 8px 20px 16px;
+    }
+    .field-cell {
+      padding: 12px 16px 12px 0;
+      min-width: 0;
+    }
+    .field-cell .cell-label {
+      font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;
+      white-space: nowrap;
+    }
+    .field-cell .cell-value {
+      font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .timeline { padding: 20px 20px 20px 28px; }
+    .tl-item {
+      position: relative; padding: 0 0 24px 32px; border-left: 2px solid #E5E7EB;
+    }
+    .tl-item:last-child { border-left-color: transparent; padding-bottom: 0; }
+    .tl-dot {
+      position: absolute; left: -9px; top: 4px; width: 16px; height: 16px; border-radius: 50%;
+      background: #fff; border: 2px solid #22C55E;
+    }
+    .tl-dot.warn { border-color: #EAB308; }
+    .tl-dot.err { border-color: #EF4444; }
+    .tl-dot.muted { border-color: #D1D5DB; }
+    .tl-time { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; white-space: nowrap; }
+    .tl-status { font-weight: 600; margin-bottom: 4px; white-space: nowrap; }
+    .tl-status .tl-init { color: var(--text-secondary); font-weight: 400; }
+    .tl-status .arrow { color: var(--text-secondary); font-weight: 400; margin: 0 6px; }
+    .tl-operator { font-size: 12px; color: var(--text-secondary); margin-top: 4px; white-space: nowrap; }
+    .tl-scope { margin-bottom: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .tag-scope {
+      display: inline-block; font-size: 11px; height: 20px; line-height: 20px;
+      padding: 0 6px; border-radius: 4px; font-weight: 500; white-space: nowrap;
+    }
+    .tag-scope-master { background: #E0E7FF; color: #3730A3; }
+    .tag-scope-sub { background: #F3F4F6; color: #4B5563; }
+    .tag-scope-scene { background: #FEF3C7; color: #92400E; }
+    .tl-ref-id { font-size: 12px; color: var(--text-secondary); font-family: ui-monospace, monospace; }
+    .cell-value.empty { color: #9CA3AF; }
+    .module-label {
+      font-size: 13px; font-weight: 600; color: var(--text-secondary);
+      margin: 0 0 8px 2px;
+    }
+    .subtask-detail-wrap { margin-bottom: 24px; }
+    .subtask-detail-wrap .card { margin-bottom: 12px; }
+    .subtask-detail-wrap .card:last-child { margin-bottom: 0; }
+    .subtask-detail-wrap .card-title .subtask-count {
+      font-size: 12px; color: var(--text-secondary); font-weight: 400; margin-left: 8px;
+    }
+    .field-cell .cell-value.muted { color: #9CA3AF; }
+    td.muted { color: #9CA3AF; font-size: 13px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Principal 资金管理系统</div>
+    <div class="nav-item active" id="nav-dw" onclick="showModule('deposit')">出入金</div>
+    <div class="nav-item nav-sub active" id="nav-dw-sub">列表</div>
+    <div class="nav-item" id="nav-stl" onclick="showModule('settlement')">法币结算</div>
+    <div class="nav-item nav-sub" id="nav-stl-sub">列表</div>
+    <div class="nav-item">数据汇总</div>
+  </aside>
+
+  <main class="main">
+    <div id="module-deposit">
+    <section id="dw-list-section">
+      <div class="breadcrumb">Principal 资金管理系统 &gt; <span>出入金</span></div>
+      <div class="page-header">
+        <h1 class="page-title">出入金</h1>
+      </div>
+
+      <div class="card">
+        <div class="filters">
+          <div class="field"><label>日期范围</label><input type="text" value="2026-06-24 ~ 2026-07-01" /></div>
+          <div class="field"><label>转出账户</label><select><option>全部</option><option>Principal X (…4821)</option><option>moomoo SG C (…1092)</option></select></div>
+          <div class="field"><label>转入账户</label><select><option>全部</option><option>Principal X (…4821)</option><option>moomoo SG C (…1092)</option></select></div>
+          <div class="field"><label>银行流水 ID</label><input type="text" placeholder="0016RF..." /></div>
+          <div class="field"><label>流水状态</label><select><option>全部</option><option>待处理</option><option>完成</option></select></div>
+          <div class="field"><label>币种</label><select><option>全部</option><option>USD</option><option>SGD</option></select></div>
+          <button class="btn btn-primary">筛选</button>
+          <button class="btn">重置</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>流水 ID</th><th>出入金方向</th><th>银行 ID</th><th>时间</th>
+              <th>金额</th><th>币种</th>
+              <th>转出方</th><th>转入方</th><th>银行方式</th>
+              <th>流水状态</th><th class="col-action">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a class="link mono" href="#" onclick="showDwDetail('completed');return false;">DW1000003</a></td>
+              <td>入金</td>
+              <td class="mono">0016RF8K2M9P4L7N2</td>
+              <td>2026-07-01 09:18:42</td>
+              <td>2,500,000.00</td>
+              <td>USD</td>
+              <td>moomoo SG C · …1092</td>
+              <td>Principal X · …4821</td>
+              <td>ACT</td>
+              <td><span class="tag tag-success">完成</span></td>
+              <td class="col-action"><a class="link" href="#" onclick="showDwDetail('completed');return false;">查看</a></td>
+            </tr>
+            <tr>
+              <td><a class="link mono" href="#" onclick="showDwDetail('pending');return false;">DW1000002</a></td>
+              <td>出金</td>
+              <td class="mono">—</td>
+              <td>2026-07-01 14:05:00</td>
+              <td>850,000.00</td>
+              <td>SGD</td>
+              <td>Principal X · …4821</td>
+              <td>moomoo SG C · …1092</td>
+              <td>ACT</td>
+              <td><span class="tag tag-warning">待处理</span></td>
+              <td class="col-action"><a class="link" href="#" onclick="showDwDetail('pending');return false;">查看</a></td>
+            </tr>
+            <tr>
+              <td><a class="link mono" href="#" onclick="showDwDetail('completed-outbound');return false;">DW1000021</a></td>
+              <td>出金</td>
+              <td class="mono">0016RF5A9K2L8M3P6</td>
+              <td>2026-06-28 10:30:00</td>
+              <td>500,000.00</td>
+              <td>USD</td>
+              <td>Principal X · …4821</td>
+              <td>moomoo SG C · …1092</td>
+              <td>ACT</td>
+              <td><span class="tag tag-success">完成</span></td>
+              <td class="col-action"><a class="link" href="#" onclick="showDwDetail('completed-outbound');return false;">查看</a></td>
+            </tr>
+            <tr>
+              <td><a class="link mono" href="#" onclick="showDwDetail('retry-exhausted');return false;">DW1000017</a></td>
+              <td>出金</td>
+              <td class="mono">0016RF3H8W1Q6R9T0</td>
+              <td>2026-06-30 16:22:11</td>
+              <td>120,000.00</td>
+              <td>USD</td>
+              <td>Principal X · …4821</td>
+              <td>moomoo SG C · …1092</td>
+              <td>ACT</td>
+              <td><span class="tag tag-warning">待处理</span></td>
+              <td class="col-action"><a class="link" href="#" onclick="showDwDetail('retry-exhausted');return false;">查看</a></td>
+            </tr>
+            <tr>
+              <td><a class="link mono" href="#" onclick="showDwDetail('completed');return false;">DW1000008</a></td>
+              <td>入金</td>
+              <td class="mono">0016RF7D2N5K8M1P4</td>
+              <td>2026-06-29 11:05:33</td>
+              <td>3,200,000.00</td>
+              <td>USD</td>
+              <td>moomoo SG C · …1092</td>
+              <td>Principal X · …4821</td>
+              <td>ACT</td>
+              <td><span class="tag tag-success">完成</span></td>
+              <td class="col-action"><a class="link" href="#" onclick="showDwDetail('completed');return false;">查看</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span>共 128 条 · 默认 20 条/页</span>
+          <span>‹ 1 2 3 … 7 ›</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="dw-detail-section" class="hidden">
+      <div class="breadcrumb">Principal 资金管理系统 &gt; 出入金 &gt; <span>详情</span></div>
+
+      <div id="detail-completed">
+        <div class="detail-header">
+          <button class="back-btn" onclick="showDwList()" title="返回列表">←</button>
+          <h1 class="page-title"><span class="mono">DW1000003</span> 入金任务</h1>
+          <span class="tag tag-success">完成</span>
+        </div>
+
+        <div class="card">
+          <div class="card-title">主任务信息</div>
+          <div class="field-grid">
+            <div class="field-cell"><div class="cell-label">主任务 ID</div><div class="cell-value mono">DW1000003</div></div>
+            <div class="field-cell"><div class="cell-label">银行流水 ID</div><div class="cell-value mono">0016RF8K2M9P4L7N2</div></div>
+            <div class="field-cell"><div class="cell-label">任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
+            <div class="field-cell"><div class="cell-label">任务方向</div><div class="cell-value">入金</div></div>
+            <div class="field-cell"><div class="cell-label">金额</div><div class="cell-value">2,500,000.00</div></div>
+            <div class="field-cell"><div class="cell-label">币种</div><div class="cell-value">USD</div></div>
+            <div class="field-cell"><div class="cell-label">任务创建时间</div><div class="cell-value">2026-07-01 09:18:38</div></div>
+            <div class="field-cell"><div class="cell-label">任务完成时间</div><div class="cell-value">2026-07-01 09:18:42</div></div>
+            <div class="field-cell"><div class="cell-label">最近更新时间</div><div class="cell-value">2026-07-01 09:18:42</div></div>
+            <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+            <div class="field-cell"><div class="cell-label">转出方银行名称</div><div class="cell-value">DBS Bank Ltd</div></div>
+            <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">moomoo SG Client Account</div></div>
+            <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">072-123456-1092</div></div>
+            <div class="field-cell"><div class="cell-label">转出方银行所在国家/地区</div><div class="cell-value">SG</div></div>
+            <div class="field-cell"><div class="cell-label">转出方 swiftBic</div><div class="cell-value mono">DBSSSGSG</div></div>
+            <div class="field-cell"><div class="cell-label">转出方 Principal 账户号码</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">转入方银行名称</div><div class="cell-value">DBS Bank Ltd</div></div>
+            <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">Principal Prime FBO Client (X)</div></div>
+            <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">072-987654-4821</div></div>
+            <div class="field-cell"><div class="cell-label">转入方银行所在国家/地区</div><div class="cell-value">SG</div></div>
+            <div class="field-cell"><div class="cell-label">转入方 swiftBic</div><div class="cell-value mono">DBSSSGSG</div></div>
+            <div class="field-cell"><div class="cell-label">转入方 Principal 账户号码</div><div class="cell-value mono">X-4821</div></div>
+            <div class="field-cell"><div class="cell-label">入金转账附言</div><div class="cell-value mono">ACT1K9M2P4Q7</div></div>
+          </div>
+        </div>
+
+        <div class="subtask-detail-wrap">
+          <div class="module-label">子任务信息</div>
+          <div class="card">
+            <div class="card-title">子任务 1</div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">ST1000048</div></div>
+              <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
+              <div class="field-cell"><div class="cell-label">银行流水 ID</div><div class="cell-value mono">0016RF8K2M9P4L7N2</div></div>
+              <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-07-01 09:18:40</div></div>
+              <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value">2026-07-01 09:18:42</div></div>
+              <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">任务变更记录</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-time">2026-07-01 09:18:42</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">DW1000003</span></div>
+              <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-success">完成</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-time">2026-07-01 09:18:41</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">ST1000048</span></div>
+              <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-success">完成</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot muted"></div>
+              <div class="tl-time">2026-07-01 09:18:40</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">ST1000048</span></div>
+              <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot muted"></div>
+              <div class="tl-time">2026-07-01 09:18:38</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">DW1000003</span></div>
+              <div class="tl-status"><span class="tl-init">创建任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="detail-pending" class="hidden">
+        <div class="detail-header">
+          <button class="back-btn" onclick="showDwList()">←</button>
+          <h1 class="page-title"><span class="mono">DW1000002</span> 出金任务</h1>
+          <span class="tag tag-warning">待处理</span>
+        </div>
+        <div class="card">
+          <div class="card-title">主任务信息</div>
+          <div class="field-grid">
+            <div class="field-cell"><div class="cell-label">主任务 ID</div><div class="cell-value mono">DW1000002</div></div>
+            <div class="field-cell"><div class="cell-label">银行流水 ID</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">任务状态</div><div class="cell-value"><span class="tag tag-warning">待处理</span></div></div>
+            <div class="field-cell"><div class="cell-label">任务方向</div><div class="cell-value">出金</div></div>
+            <div class="field-cell"><div class="cell-label">金额</div><div class="cell-value">850,000.00</div></div>
+            <div class="field-cell"><div class="cell-label">币种</div><div class="cell-value">SGD</div></div>
+            <div class="field-cell"><div class="cell-label">任务创建时间</div><div class="cell-value">2026-07-01 14:05:00</div></div>
+            <div class="field-cell"><div class="cell-label">任务完成时间</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">最近更新时间</div><div class="cell-value">2026-07-01 14:05:01</div></div>
+            <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+            <div class="field-cell"><div class="cell-label">转出方银行名称</div><div class="cell-value">DBS Bank Ltd</div></div>
+            <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal Prime FBO Client (X)</div></div>
+            <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">072-987654-4821</div></div>
+            <div class="field-cell"><div class="cell-label">转出方银行所在国家/地区</div><div class="cell-value">SG</div></div>
+            <div class="field-cell"><div class="cell-label">转出方 swiftBic</div><div class="cell-value mono">DBSSSGSG</div></div>
+            <div class="field-cell"><div class="cell-label">转出方 Principal 账户号码</div><div class="cell-value mono">X-4821</div></div>
+            <div class="field-cell"><div class="cell-label">转入方银行名称</div><div class="cell-value">DBS Bank Ltd</div></div>
+            <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">moomoo SG Client Account</div></div>
+            <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">072-123456-1092</div></div>
+            <div class="field-cell"><div class="cell-label">转入方银行所在国家/地区</div><div class="cell-value">SG</div></div>
+            <div class="field-cell"><div class="cell-label">转入方 swiftBic</div><div class="cell-value mono">DBSSSGSG</div></div>
+            <div class="field-cell"><div class="cell-label">转入方 Principal 账户号码</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">入金转账附言</div><div class="cell-value muted">—</div></div>
+          </div>
+        </div>
+        <div class="subtask-detail-wrap">
+          <div class="module-label">子任务信息</div>
+          <div class="card">
+            <div class="card-title">子任务 1</div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">ST1000049</div></div>
+              <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-warning">待处理</span></div></div>
+              <div class="field-cell"><div class="cell-label">银行流水 ID</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-07-01 14:05:01</div></div>
+              <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">任务变更记录</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot warn"></div>
+              <div class="tl-time">2026-07-01 14:05:01</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">ST1000049</span></div>
+              <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot warn"></div>
+              <div class="tl-time">2026-07-01 14:05:00</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">DW1000002</span></div>
+              <div class="tl-status"><span class="tl-init">创建任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="detail-completed-outbound" class="hidden">
+        <div class="detail-header">
+          <button class="back-btn" onclick="showDwList()">←</button>
+          <h1 class="page-title"><span class="mono">DW1000021</span> 出金任务</h1>
+          <span class="tag tag-success">完成</span>
+        </div>
+        <div class="card">
+          <div class="card-title">主任务信息</div>
+          <div class="field-grid">
+            <div class="field-cell"><div class="cell-label">主任务 ID</div><div class="cell-value mono">DW1000021</div></div>
+            <div class="field-cell"><div class="cell-label">银行流水 ID</div><div class="cell-value mono">0016RF5A9K2L8M3P6</div></div>
+            <div class="field-cell"><div class="cell-label">任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
+            <div class="field-cell"><div class="cell-label">任务方向</div><div class="cell-value">出金</div></div>
+            <div class="field-cell"><div class="cell-label">金额</div><div class="cell-value">500,000.00</div></div>
+            <div class="field-cell"><div class="cell-label">币种</div><div class="cell-value">USD</div></div>
+            <div class="field-cell"><div class="cell-label">任务创建时间</div><div class="cell-value">2026-06-28 10:30:00</div></div>
+            <div class="field-cell"><div class="cell-label">任务完成时间</div><div class="cell-value">2026-06-28 15:42:18</div></div>
+            <div class="field-cell"><div class="cell-label">最近更新时间</div><div class="cell-value">2026-06-28 15:42:18</div></div>
+            <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+            <div class="field-cell"><div class="cell-label">转出方银行名称</div><div class="cell-value">DBS Bank Ltd</div></div>
+            <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal Prime FBO Client (X)</div></div>
+            <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">072-987654-4821</div></div>
+            <div class="field-cell"><div class="cell-label">转出方银行所在国家/地区</div><div class="cell-value">SG</div></div>
+            <div class="field-cell"><div class="cell-label">转出方 swiftBic</div><div class="cell-value mono">DBSSSGSG</div></div>
+            <div class="field-cell"><div class="cell-label">转出方 Principal 账户号码</div><div class="cell-value mono">X-4821</div></div>
+            <div class="field-cell"><div class="cell-label">转入方银行名称</div><div class="cell-value">DBS Bank Ltd</div></div>
+            <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">moomoo SG Client Account</div></div>
+            <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">072-123456-1092</div></div>
+            <div class="field-cell"><div class="cell-label">转入方银行所在国家/地区</div><div class="cell-value">SG</div></div>
+            <div class="field-cell"><div class="cell-label">转入方 swiftBic</div><div class="cell-value mono">DBSSSGSG</div></div>
+            <div class="field-cell"><div class="cell-label">转入方 Principal 账户号码</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">入金转账附言</div><div class="cell-value muted">—</div></div>
+          </div>
+        </div>
+        <div class="subtask-detail-wrap">
+          <div class="module-label">子任务信息</div>
+          <div class="card">
+            <div class="card-title">子任务 1</div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">ST1000031</div></div>
+              <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-error">失败</span></div></div>
+              <div class="field-cell"><div class="cell-label">银行流水 ID</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-28 10:30:02</div></div>
+              <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value" style="white-space:normal;line-height:1.45;color:#991B1B;">API 请求超时，银行终态未知</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">子任务 2<span class="subtask-count">第 2 次重试成功</span></div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">ST1000032</div></div>
+              <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
+              <div class="field-cell"><div class="cell-label">银行流水 ID</div><div class="cell-value mono">0016RF5A9K2L8M3P6</div></div>
+              <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-28 14:20:05</div></div>
+              <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value">2026-06-28 15:42:17</div></div>
+              <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">任务变更记录</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-time">2026-06-28 15:42:18</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">DW1000021</span></div>
+              <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-success">完成</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-time">2026-06-28 15:42:17</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">ST1000032</span></div>
+              <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-success">完成</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot warn"></div>
+              <div class="tl-time">2026-06-28 14:20:05</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">ST1000032</span></div>
+              <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System · 第 2 次重试</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot err"></div>
+              <div class="tl-time">2026-06-28 10:32:18</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">ST1000031</span></div>
+              <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-error">失败</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot muted"></div>
+              <div class="tl-time">2026-06-28 10:30:02</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">ST1000031</span></div>
+              <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System · 第 1 次请求</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot muted"></div>
+              <div class="tl-time">2026-06-28 10:30:00</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">DW1000021</span></div>
+              <div class="tl-status"><span class="tl-init">创建任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="detail-retry-exhausted" class="hidden">
+        <div class="detail-header">
+          <button class="back-btn" onclick="showDwList()">←</button>
+          <h1 class="page-title"><span class="mono">DW1000017</span> 出金任务</h1>
+          <span class="tag tag-warning">待处理</span>
+          <div class="detail-header-actions">
+            <button class="btn btn-primary">重试</button>
+          </div>
+        </div>
+        <div class="detail-alert">子任务均已失败且已达重试上限；主任务保持「待处理」，需人工介入或手动重试后再发起新的子任务。</div>
+        <div class="card">
+          <div class="card-title">主任务信息</div>
+          <div class="field-grid">
+            <div class="field-cell"><div class="cell-label">主任务 ID</div><div class="cell-value mono">DW1000017</div></div>
+            <div class="field-cell"><div class="cell-label">银行流水 ID</div><div class="cell-value mono">0016RF3H8W1Q6R9T0</div></div>
+            <div class="field-cell"><div class="cell-label">任务状态</div><div class="cell-value"><span class="tag tag-warning">待处理</span></div></div>
+            <div class="field-cell"><div class="cell-label">任务方向</div><div class="cell-value">出金</div></div>
+            <div class="field-cell"><div class="cell-label">金额</div><div class="cell-value">120,000.00</div></div>
+            <div class="field-cell"><div class="cell-label">币种</div><div class="cell-value">USD</div></div>
+            <div class="field-cell"><div class="cell-label">任务创建时间</div><div class="cell-value">2026-06-30 16:22:11</div></div>
+            <div class="field-cell"><div class="cell-label">任务完成时间</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">最近更新时间</div><div class="cell-value">2026-06-30 18:45:21</div></div>
+            <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+            <div class="field-cell"><div class="cell-label">转出方银行名称</div><div class="cell-value">DBS Bank Ltd</div></div>
+            <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal Prime FBO Client (X)</div></div>
+            <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">072-987654-4821</div></div>
+            <div class="field-cell"><div class="cell-label">转出方银行所在国家/地区</div><div class="cell-value">SG</div></div>
+            <div class="field-cell"><div class="cell-label">转出方 swiftBic</div><div class="cell-value mono">DBSSSGSG</div></div>
+            <div class="field-cell"><div class="cell-label">转出方 Principal 账户号码</div><div class="cell-value mono">X-4821</div></div>
+            <div class="field-cell"><div class="cell-label">转入方银行名称</div><div class="cell-value">DBS Bank Ltd</div></div>
+            <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">moomoo SG Client Account</div></div>
+            <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">072-123456-1092</div></div>
+            <div class="field-cell"><div class="cell-label">转入方银行所在国家/地区</div><div class="cell-value">SG</div></div>
+            <div class="field-cell"><div class="cell-label">转入方 swiftBic</div><div class="cell-value mono">DBSSSGSG</div></div>
+            <div class="field-cell"><div class="cell-label">转入方 Principal 账户号码</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">入金转账附言</div><div class="cell-value muted">—</div></div>
+          </div>
+        </div>
+        <div class="subtask-detail-wrap">
+          <div class="module-label">子任务信息<span class="subtask-count">共 3 条 · 已达重试上限</span></div>
+          <div class="card">
+            <div class="card-title">子任务 1</div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">ST1000025</div></div>
+              <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-error">失败</span></div></div>
+              <div class="field-cell"><div class="cell-label">银行流水 ID</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-30 16:22:15</div></div>
+              <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value" style="white-space:normal;line-height:1.45;color:#991B1B;">HTTP 504 Gateway Timeout，未收到 ACK1</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">子任务 2</div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">ST1000026</div></div>
+              <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-error">失败</span></div></div>
+              <div class="field-cell"><div class="cell-label">银行流水 ID</div><div class="cell-value mono">0016RF3H8W1Q6R9T0</div></div>
+              <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-30 17:30:00</div></div>
+              <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value" style="white-space:normal;line-height:1.45;color:#991B1B;">银行返回 RJCT：收款账户信息不匹配</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">子任务 3</div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">ST1000027</div></div>
+              <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-error">失败</span></div></div>
+              <div class="field-cell"><div class="cell-label">银行流水 ID</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-30 18:20:00</div></div>
+              <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value" style="white-space:normal;line-height:1.45;color:#991B1B;">银行返回 RJCT：余额不足（Insufficient Balance）</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">任务变更记录</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot err"></div>
+              <div class="tl-time">2026-06-30 18:45:21</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">ST1000027</span></div>
+              <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-error">失败</span></div>
+              <div class="tl-operator">操作人：System · 已达重试上限</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot warn"></div>
+              <div class="tl-time">2026-06-30 18:20:00</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">ST1000027</span></div>
+              <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System · 第 3 次重试</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot err"></div>
+              <div class="tl-time">2026-06-30 17:58:33</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">ST1000026</span></div>
+              <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-error">失败</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot warn"></div>
+              <div class="tl-time">2026-06-30 17:30:00</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">ST1000026</span></div>
+              <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System · 第 2 次重试</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot err"></div>
+              <div class="tl-time">2026-06-30 16:45:00</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">ST1000025</span></div>
+              <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-error">失败</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot muted"></div>
+              <div class="tl-time">2026-06-30 16:22:15</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">ST1000025</span></div>
+              <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System · 第 1 次请求</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot muted"></div>
+              <div class="tl-time">2026-06-30 16:22:11</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">DW1000017</span></div>
+              <div class="tl-status"><span class="tl-init">创建任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    </div>
+
+    <div id="module-settlement" class="hidden">
+      <section id="stl-list-section">
+        <div class="breadcrumb">Principal 资金管理系统 &gt; <span>法币结算</span></div>
+        <div class="page-header">
+          <h1 class="page-title">法币结算</h1>
+        </div>
+        <div class="card">
+          <div class="filters">
+            <div class="field"><label>日期范围</label><input type="text" value="2026-06-01 ~ 2026-06-29" /></div>
+            <div class="field"><label>转出账户</label><select><option>全部</option><option>Principal X (…4821)</option><option>Principal Y (…7720)</option><option>OKX Funding</option></select></div>
+            <div class="field"><label>转入账户</label><select><option>全部</option><option>Principal Y (…7720)</option><option>OKX Funding</option><option>OKX Trading</option></select></div>
+            <div class="field"><label>任务 ID</label><input type="text" placeholder="FS1000029" /></div>
+            <div class="field"><label>交收系统指令 ID</label><input type="text" placeholder="INS-..." /></div>
+            <div class="field"><label>银行流水 ID</label><input type="text" placeholder="0016RF..." /></div>
+            <div class="field"><label>调拨 ID</label><input type="text" placeholder="OKX-..." /></div>
+            <div class="field"><label>任务状态</label><select><option>全部</option><option>待处理</option><option>已完成</option></select></div>
+            <div class="field"><label>任务方向</label><select><option>全部</option><option>应付</option><option>应收</option></select></div>
+            <div class="field"><label>币种</label><select><option>全部</option><option>USD</option><option>SGD</option></select></div>
+            <button class="btn btn-primary">筛选</button>
+            <button class="btn">重置</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>任务 ID</th><th>交收系统指令 ID</th><th>任务方向</th><th>任务创建时间</th>
+                <th>任务状态</th><th>当前阶段</th><th>金额</th><th>币种</th>
+                <th>转出方</th><th>转入方</th><th class="col-action">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a class="link mono" href="#" onclick="showStlDetail('internal-pending');return false;">FS1000035</a></td>
+                <td class="mono">INS-8850101</td>
+                <td>应付</td>
+                <td>2026-06-30 08:15:00</td>
+                <td><span class="tag tag-warning">待处理</span></td>
+                <td>内部调拨</td>
+                <td>320,000.00</td><td>USD</td>
+                <td>Principal X · …4821</td>
+                <td>Principal Y · …7720</td>
+                <td class="col-action"><a class="link" href="#" onclick="showStlDetail('internal-pending');return false;">查看</a></td>
+              </tr>
+              <tr>
+                <td><a class="link mono" href="#" onclick="showStlDetail('upstream-pending');return false;">FS1000029</a></td>
+                <td class="mono">INS-8847291</td>
+                <td>应付</td>
+                <td>2026-06-29 10:00:00</td>
+                <td><span class="tag tag-warning">待处理</span></td>
+                <td>与上游结算</td>
+                <td>1,000,000.00</td><td>USD</td>
+                <td>Principal Y · …7720</td>
+                <td>OKX Funding · …9012</td>
+                <td class="col-action"><a class="link" href="#" onclick="showStlDetail('upstream-pending');return false;">查看</a></td>
+              </tr>
+              <tr>
+                <td><a class="link mono" href="#" onclick="showStlDetail('okx-pending');return false;">FS1000022</a></td>
+                <td class="mono">INS-8849200</td>
+                <td>应付</td>
+                <td>2026-06-29 08:40:00</td>
+                <td><span class="tag tag-warning">待处理</span></td>
+                <td>上游调拨</td>
+                <td>750,000.00</td><td>USD</td>
+                <td>OKX Funding · …9012</td>
+                <td>OKX Trading · …3366</td>
+                <td class="col-action"><a class="link" href="#" onclick="showStlDetail('okx-pending');return false;">查看</a></td>
+              </tr>
+              <tr>
+                <td><a class="link mono" href="#" onclick="showStlDetail('completed');return false;">FS1000012</a></td>
+                <td class="mono">INS-8847102</td>
+                <td>应付</td>
+                <td>2026-06-28 14:20:00</td>
+                <td><span class="tag tag-success">已完成</span></td>
+                <td class="muted">—</td>
+                <td>500,000.00</td><td>USD</td>
+                <td>Principal X · …4821</td>
+                <td>Principal Y · …7720</td>
+                <td class="col-action"><a class="link" href="#" onclick="showStlDetail('completed');return false;">查看</a></td>
+              </tr>
+              <tr>
+                <td><a class="link mono" href="#" onclick="showStlDetail('retry-exhausted');return false;">FS1000018</a></td>
+                <td class="mono">INS-8846890</td>
+                <td>应收</td>
+                <td>2026-06-27 09:15:00</td>
+                <td><span class="tag tag-warning">待处理</span></td>
+                <td>与上游结算</td>
+                <td>200,000.00</td><td>SGD</td>
+                <td>OKX Funding · …9012</td>
+                <td>Principal Y · …7720</td>
+                <td class="col-action"><a class="link" href="#" onclick="showStlDetail('retry-exhausted');return false;">查看</a></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span>共 52 条 · 默认 20 条/页</span>
+            <span>‹ 1 2 3 ›</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="stl-detail-section" class="hidden">
+        <div class="breadcrumb">Principal 资金管理系统 &gt; 法币结算 &gt; <span>详情</span></div>
+
+        <div id="stl-detail-internal-pending" class="hidden">
+          <div class="detail-header">
+            <button class="back-btn" onclick="showStlList()" title="返回列表">←</button>
+            <h1 class="page-title"><span class="mono">FS1000035</span> 应付任务</h1>
+            <span class="tag tag-warning">待处理</span>
+          </div>
+          <div class="card">
+            <div class="card-title">任务维度信息</div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">任务 ID</div><div class="cell-value mono">FS1000035</div></div>
+              <div class="field-cell"><div class="cell-label">交收系统指令 ID</div><div class="cell-value mono">INS-8850101</div></div>
+              <div class="field-cell"><div class="cell-label">交收系统任务发起时间</div><div class="cell-value">2026-06-30 08:14:30</div></div>
+              <div class="field-cell"><div class="cell-label">法币结算任务创建时间</div><div class="cell-value">2026-06-30 08:15:00</div></div>
+              <div class="field-cell"><div class="cell-label">法币结算任务完成时间</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">法币结算任务最近更新时间</div><div class="cell-value">2026-06-30 08:15:02</div></div>
+              <div class="field-cell"><div class="cell-label">任务方向</div><div class="cell-value">应付</div></div>
+              <div class="field-cell"><div class="cell-label">任务状态</div><div class="cell-value"><span class="tag tag-warning">待处理</span></div></div>
+              <div class="field-cell"><div class="cell-label">当前阶段</div><div class="cell-value">内部调拨</div></div>
+              <div class="field-cell"><div class="cell-label">金额</div><div class="cell-value">320,000.00</div></div>
+              <div class="field-cell"><div class="cell-label">币种</div><div class="cell-value">USD</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">任务进度</div>
+            <div class="pipeline">
+              <div class="pipeline-inner">
+              <div class="pipe-node pipe-anchor">
+                <div class="pipe-circle done">起</div>
+                <div class="pipe-title">法币结算任务创建</div>
+                <div class="pipe-sub">主任务起点</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-30<br>08:15:00</span></div>
+                </div>
+              </div>
+              <div class="pipe-line done"></div>
+              <div class="pipe-node">
+                <div class="pipe-circle running">●</div>
+                <div class="pipe-title">① Principal 内部调拨</div>
+                <div class="pipe-sub" style="color:#854D0E">子任务进行中</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-30<br>08:15:01</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">—</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">子任务</span><span class="pipe-time-val">1</span></div>
+                </div>
+              </div>
+              <div class="pipe-line"></div>
+              <div class="pipe-node">
+                <div class="pipe-circle pending">2</div>
+                <div class="pipe-title">② 与上游结算</div>
+                <div class="pipe-sub">未开始</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">—</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">—</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">子任务</span><span class="pipe-time-val">—</span></div>
+                </div>
+              </div>
+              <div class="pipe-line"></div>
+              <div class="pipe-node">
+                <div class="pipe-circle pending">3</div>
+                <div class="pipe-title">③ 上游账户调拨</div>
+                <div class="pipe-sub">未开始</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">—</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">—</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">子任务</span><span class="pipe-time-val">—</span></div>
+                </div>
+              </div>
+              <div class="pipe-line"></div>
+              <div class="pipe-node pipe-anchor">
+                <div class="pipe-circle pending">终</div>
+                <div class="pipe-title">法币结算任务完成</div>
+                <div class="pipe-sub">主任务终点</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">—</span></div>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+          <div class="subtask-detail-wrap">
+            <div class="module-label">子任务信息</div>
+            <div class="card">
+              <div class="card-title">子任务 1 · Principal 内部调拨</div>
+              <div class="field-grid">
+                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">FST2000041</div></div>
+                <div class="field-cell"><div class="cell-label">子任务类型</div><div class="cell-value">Principal 内部调拨</div></div>
+                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-warning">待处理</span></div></div>
+                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-30 08:15:01</div></div>
+                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">SG Principal 内部调拨银行流水 ID</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal X</div></div>
+                <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">…4821</div></div>
+                <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">Principal Y</div></div>
+                <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">…7720</div></div>
+                <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">任务变更记录</div>
+            <div class="timeline">
+              <div class="tl-item">
+                <div class="tl-dot warn"></div>
+                <div class="tl-time">2026-06-30 08:15:01</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">Principal 内部调拨</span><span class="tl-ref-id mono">FST2000041</span></div>
+                <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot muted"></div>
+                <div class="tl-time">2026-06-30 08:15:00</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">FS1000035</span></div>
+                <div class="tl-status"><span class="tl-init">创建任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="stl-detail-upstream-pending" class="hidden">
+          <div class="detail-header">
+            <button class="back-btn" onclick="showStlList()" title="返回列表">←</button>
+            <h1 class="page-title"><span class="mono">FS1000029</span> 应付任务</h1>
+            <span class="tag tag-warning">待处理</span>
+            <div class="detail-header-actions">
+              <button class="btn btn-primary">重试</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">任务维度信息</div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">任务 ID</div><div class="cell-value mono">FS1000029</div></div>
+              <div class="field-cell"><div class="cell-label">交收系统指令 ID</div><div class="cell-value mono">INS-8847291</div></div>
+              <div class="field-cell"><div class="cell-label">交收系统任务发起时间</div><div class="cell-value">2026-06-29 09:58:12</div></div>
+              <div class="field-cell"><div class="cell-label">法币结算任务创建时间</div><div class="cell-value">2026-06-29 10:00:00</div></div>
+              <div class="field-cell"><div class="cell-label">法币结算任务完成时间</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">法币结算任务最近更新时间</div><div class="cell-value">2026-06-29 10:12:30</div></div>
+              <div class="field-cell"><div class="cell-label">任务方向</div><div class="cell-value">应付</div></div>
+              <div class="field-cell"><div class="cell-label">任务状态</div><div class="cell-value"><span class="tag tag-warning">待处理</span></div></div>
+              <div class="field-cell"><div class="cell-label">当前阶段</div><div class="cell-value">与上游结算</div></div>
+              <div class="field-cell"><div class="cell-label">金额</div><div class="cell-value">1,000,000.00</div></div>
+              <div class="field-cell"><div class="cell-label">币种</div><div class="cell-value">USD</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">任务进度</div>
+            <div class="pipeline">
+              <div class="pipeline-inner">
+              <div class="pipe-node pipe-anchor">
+                <div class="pipe-circle done">起</div>
+                <div class="pipe-title">法币结算任务创建</div>
+                <div class="pipe-sub">主任务起点</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-29<br>10:00:00</span></div>
+                </div>
+              </div>
+              <div class="pipe-line done"></div>
+              <div class="pipe-node">
+                <div class="pipe-circle done">✓</div>
+                <div class="pipe-title">① Principal 内部调拨</div>
+                <div class="pipe-sub" style="color:#166534">子任务已完成</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-29<br>10:00:01</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">2026-06-29<br>10:09:02</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">子任务</span><span class="pipe-time-val">1</span></div>
+                </div>
+              </div>
+              <div class="pipe-line done"></div>
+              <div class="pipe-node">
+                <div class="pipe-circle running">●</div>
+                <div class="pipe-title">② 与上游结算</div>
+                <div class="pipe-sub" style="color:#854D0E">子任务进行中 · 第 2 次重试</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-29<br>10:09:05</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">—</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">子任务</span><span class="pipe-time-val">2</span></div>
+                </div>
+              </div>
+              <div class="pipe-line"></div>
+              <div class="pipe-node">
+                <div class="pipe-circle pending">3</div>
+                <div class="pipe-title">③ 上游账户调拨</div>
+                <div class="pipe-sub">未开始</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">—</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">—</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">子任务</span><span class="pipe-time-val">—</span></div>
+                </div>
+              </div>
+              <div class="pipe-line"></div>
+              <div class="pipe-node pipe-anchor">
+                <div class="pipe-circle pending">终</div>
+                <div class="pipe-title">法币结算任务完成</div>
+                <div class="pipe-sub">主任务终点</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">—</span></div>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+          <div class="subtask-detail-wrap">
+            <div class="module-label">子任务信息</div>
+            <div class="card">
+              <div class="card-title">子任务 1 · Principal 内部调拨</div>
+              <div class="field-grid">
+                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">FST2000029</div></div>
+                <div class="field-cell"><div class="cell-label">子任务类型</div><div class="cell-value">Principal 内部调拨</div></div>
+                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
+                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-29 10:00:01</div></div>
+                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value">2026-06-29 10:09:02</div></div>
+                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">SG Principal 内部调拨银行流水 ID</div><div class="cell-value mono">DBS20260629889</div></div>
+                <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal X</div></div>
+                <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">…4821</div></div>
+                <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">Principal Y</div></div>
+                <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">…7720</div></div>
+                <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">子任务 2 · 与上游结算</div>
+              <div class="field-grid">
+                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">FST2000030</div></div>
+                <div class="field-cell"><div class="cell-label">子任务类型</div><div class="cell-value">与上游结算</div></div>
+                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-error">失败</span></div></div>
+                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-29 10:09:05</div></div>
+                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value" style="white-space:normal;line-height:1.45;color:#991B1B;">HTTP 504 Gateway Timeout，未收到银行 ACK</div></div>
+                <div class="field-cell"><div class="cell-label">与上游结算银行流水 ID</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal Y</div></div>
+                <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">…7720</div></div>
+                <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">OKX Funding</div></div>
+                <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">…9012</div></div>
+                <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">子任务 3 · 与上游结算<span class="subtask-count">第 2 次重试</span></div>
+              <div class="field-grid">
+                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">FST2000031</div></div>
+                <div class="field-cell"><div class="cell-label">子任务类型</div><div class="cell-value">与上游结算</div></div>
+                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-warning">待处理</span></div></div>
+                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-29 10:12:28</div></div>
+                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">与上游结算银行流水 ID</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal Y</div></div>
+                <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">…7720</div></div>
+                <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">OKX Funding</div></div>
+                <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">…9012</div></div>
+                <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">任务变更记录</div>
+            <div class="timeline">
+              <div class="tl-item">
+                <div class="tl-dot warn"></div>
+                <div class="tl-time">2026-06-29 10:12:28</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">与上游结算</span><span class="tl-ref-id mono">FST2000031</span></div>
+                <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System · 第 2 次重试</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot err"></div>
+                <div class="tl-time">2026-06-29 10:12:18</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">与上游结算</span><span class="tl-ref-id mono">FST2000030</span></div>
+                <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-error">失败</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot warn"></div>
+                <div class="tl-time">2026-06-29 10:09:05</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">与上游结算</span><span class="tl-ref-id mono">FST2000030</span></div>
+                <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System · 第 1 次请求</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot"></div>
+                <div class="tl-time">2026-06-29 10:09:02</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">Principal 内部调拨</span><span class="tl-ref-id mono">FST2000029</span></div>
+                <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-success">完成</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot muted"></div>
+                <div class="tl-time">2026-06-29 10:00:01</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">Principal 内部调拨</span><span class="tl-ref-id mono">FST2000029</span></div>
+                <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot muted"></div>
+                <div class="tl-time">2026-06-29 10:00:00</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">FS1000029</span></div>
+                <div class="tl-status"><span class="tl-init">创建任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="stl-detail-okx-pending" class="hidden">
+          <div class="detail-header">
+            <button class="back-btn" onclick="showStlList()">←</button>
+            <h1 class="page-title"><span class="mono">FS1000022</span> 应付任务</h1>
+            <span class="tag tag-warning">待处理</span>
+          </div>
+          <div class="card">
+            <div class="card-title">任务维度信息</div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">任务 ID</div><div class="cell-value mono">FS1000022</div></div>
+              <div class="field-cell"><div class="cell-label">交收系统指令 ID</div><div class="cell-value mono">INS-8849200</div></div>
+              <div class="field-cell"><div class="cell-label">交收系统任务发起时间</div><div class="cell-value">2026-06-29 08:38:00</div></div>
+              <div class="field-cell"><div class="cell-label">法币结算任务创建时间</div><div class="cell-value">2026-06-29 08:40:00</div></div>
+              <div class="field-cell"><div class="cell-label">法币结算任务完成时间</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">法币结算任务最近更新时间</div><div class="cell-value">2026-06-29 10:22:05</div></div>
+              <div class="field-cell"><div class="cell-label">任务方向</div><div class="cell-value">应付</div></div>
+              <div class="field-cell"><div class="cell-label">任务状态</div><div class="cell-value"><span class="tag tag-warning">待处理</span></div></div>
+              <div class="field-cell"><div class="cell-label">当前阶段</div><div class="cell-value">上游调拨</div></div>
+              <div class="field-cell"><div class="cell-label">金额</div><div class="cell-value">750,000.00</div></div>
+              <div class="field-cell"><div class="cell-label">币种</div><div class="cell-value">USD</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">任务进度</div>
+            <div class="pipeline">
+              <div class="pipeline-inner">
+              <div class="pipe-node pipe-anchor">
+                <div class="pipe-circle done">起</div>
+                <div class="pipe-title">法币结算任务创建</div>
+                <div class="pipe-sub">主任务起点</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-29<br>08:40:00</span></div>
+                </div>
+              </div>
+              <div class="pipe-line done"></div>
+              <div class="pipe-node">
+                <div class="pipe-circle done">✓</div>
+                <div class="pipe-title">① Principal 内部调拨</div>
+                <div class="pipe-sub" style="color:#166534">子任务已完成</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-29<br>08:40:01</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">2026-06-29<br>09:05:12</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">子任务</span><span class="pipe-time-val">1</span></div>
+                </div>
+              </div>
+              <div class="pipe-line done"></div>
+              <div class="pipe-node">
+                <div class="pipe-circle done">✓</div>
+                <div class="pipe-title">② 与上游结算</div>
+                <div class="pipe-sub" style="color:#166534">子任务已完成</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-29<br>09:05:15</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">2026-06-29<br>10:22:00</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">子任务</span><span class="pipe-time-val">1</span></div>
+                </div>
+              </div>
+              <div class="pipe-line done"></div>
+              <div class="pipe-node">
+                <div class="pipe-circle running">●</div>
+                <div class="pipe-title">③ 上游账户调拨</div>
+                <div class="pipe-sub" style="color:#854D0E">子任务进行中</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-29<br>10:22:05</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">—</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">子任务</span><span class="pipe-time-val">1</span></div>
+                </div>
+              </div>
+              <div class="pipe-line"></div>
+              <div class="pipe-node pipe-anchor">
+                <div class="pipe-circle pending">终</div>
+                <div class="pipe-title">法币结算任务完成</div>
+                <div class="pipe-sub">主任务终点</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">—</span></div>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+          <div class="subtask-detail-wrap">
+            <div class="module-label">子任务信息</div>
+            <div class="card">
+              <div class="card-title">子任务 1 · Principal 内部调拨</div>
+              <div class="field-grid">
+                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">FST2000022</div></div>
+                <div class="field-cell"><div class="cell-label">子任务类型</div><div class="cell-value">Principal 内部调拨</div></div>
+                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
+                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-29 08:40:01</div></div>
+                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value">2026-06-29 09:05:12</div></div>
+                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">SG Principal 内部调拨银行流水 ID</div><div class="cell-value mono">DBS20260629801</div></div>
+                <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal X</div></div>
+                <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">…4821</div></div>
+                <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">Principal Y</div></div>
+                <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">…7720</div></div>
+                <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">子任务 2 · 与上游结算</div>
+              <div class="field-grid">
+                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">FST2000023</div></div>
+                <div class="field-cell"><div class="cell-label">子任务类型</div><div class="cell-value">与上游结算</div></div>
+                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
+                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-29 09:05:15</div></div>
+                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value">2026-06-29 10:22:00</div></div>
+                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">与上游结算银行流水 ID</div><div class="cell-value mono">DBS20260629902</div></div>
+                <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal Y</div></div>
+                <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">…7720</div></div>
+                <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">OKX Funding</div></div>
+                <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">…9012</div></div>
+                <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">子任务 3 · 上游账户调拨</div>
+              <div class="field-grid">
+                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">FST2000024</div></div>
+                <div class="field-cell"><div class="cell-label">子任务类型</div><div class="cell-value">上游账户调拨</div></div>
+                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-warning">待处理</span></div></div>
+                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-29 10:22:05</div></div>
+                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">上游账户调拨 ID</div><div class="cell-value muted">—</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">任务变更记录</div>
+            <div class="timeline">
+              <div class="tl-item">
+                <div class="tl-dot warn"></div>
+                <div class="tl-time">2026-06-29 10:22:05</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">上游账户调拨</span><span class="tl-ref-id mono">FST2000024</span></div>
+                <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot"></div>
+                <div class="tl-time">2026-06-29 10:22:00</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">与上游结算</span><span class="tl-ref-id mono">FST2000023</span></div>
+                <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-success">完成</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot muted"></div>
+                <div class="tl-time">2026-06-29 09:05:15</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">与上游结算</span><span class="tl-ref-id mono">FST2000023</span></div>
+                <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot"></div>
+                <div class="tl-time">2026-06-29 09:05:12</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">Principal 内部调拨</span><span class="tl-ref-id mono">FST2000022</span></div>
+                <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-success">完成</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot muted"></div>
+                <div class="tl-time">2026-06-29 08:40:01</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">Principal 内部调拨</span><span class="tl-ref-id mono">FST2000022</span></div>
+                <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot muted"></div>
+                <div class="tl-time">2026-06-29 08:40:00</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">FS1000022</span></div>
+                <div class="tl-status"><span class="tl-init">创建任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="stl-detail-completed" class="hidden">
+          <div class="detail-header">
+            <button class="back-btn" onclick="showStlList()">←</button>
+            <h1 class="page-title"><span class="mono">FS1000012</span> 应付任务</h1>
+            <span class="tag tag-success">已完成</span>
+          </div>
+          <div class="card">
+            <div class="card-title">任务维度信息</div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">任务 ID</div><div class="cell-value mono">FS1000012</div></div>
+              <div class="field-cell"><div class="cell-label">交收系统指令 ID</div><div class="cell-value mono">INS-8847102</div></div>
+              <div class="field-cell"><div class="cell-label">交收系统任务发起时间</div><div class="cell-value">2026-06-28 14:18:00</div></div>
+              <div class="field-cell"><div class="cell-label">法币结算任务创建时间</div><div class="cell-value">2026-06-28 14:20:00</div></div>
+              <div class="field-cell"><div class="cell-label">法币结算任务完成时间</div><div class="cell-value">2026-06-28 14:48:15</div></div>
+              <div class="field-cell"><div class="cell-label">法币结算任务最近更新时间</div><div class="cell-value">2026-06-28 14:48:15</div></div>
+              <div class="field-cell"><div class="cell-label">任务方向</div><div class="cell-value">应付</div></div>
+              <div class="field-cell"><div class="cell-label">任务状态</div><div class="cell-value"><span class="tag tag-success">已完成</span></div></div>
+              <div class="field-cell"><div class="cell-label">当前阶段</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">金额</div><div class="cell-value">500,000.00</div></div>
+              <div class="field-cell"><div class="cell-label">币种</div><div class="cell-value">USD</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">任务进度</div>
+            <div class="pipeline">
+              <div class="pipeline-inner">
+              <div class="pipe-node pipe-anchor">
+                <div class="pipe-circle done">起</div>
+                <div class="pipe-title">法币结算任务创建</div>
+                <div class="pipe-sub">主任务起点</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-28<br>14:20:00</span></div>
+                </div>
+              </div>
+              <div class="pipe-line done"></div>
+              <div class="pipe-node">
+                <div class="pipe-circle done">✓</div>
+                <div class="pipe-title">① Principal 内部调拨</div>
+                <div class="pipe-sub" style="color:#166534">子任务已完成</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-28<br>14:20:01</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">2026-06-28<br>14:28:30</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">子任务</span><span class="pipe-time-val">1</span></div>
+                </div>
+              </div>
+              <div class="pipe-line done"></div>
+              <div class="pipe-node">
+                <div class="pipe-circle done">✓</div>
+                <div class="pipe-title">② 与上游结算</div>
+                <div class="pipe-sub" style="color:#166534">子任务已完成 · 含 1 次重试</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-28<br>14:28:35</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">2026-06-28<br>14:40:10</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">子任务</span><span class="pipe-time-val">2</span></div>
+                </div>
+              </div>
+              <div class="pipe-line done"></div>
+              <div class="pipe-node">
+                <div class="pipe-circle done">✓</div>
+                <div class="pipe-title">③ 上游账户调拨</div>
+                <div class="pipe-sub" style="color:#166534">子任务已完成</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-28<br>14:40:12</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">2026-06-28<br>14:48:14</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">子任务</span><span class="pipe-time-val">1</span></div>
+                </div>
+              </div>
+              <div class="pipe-line done"></div>
+              <div class="pipe-node pipe-anchor">
+                <div class="pipe-circle done">终</div>
+                <div class="pipe-title">法币结算任务完成</div>
+                <div class="pipe-sub">主任务终点</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">2026-06-28<br>14:48:15</span></div>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+          <div class="subtask-detail-wrap">
+            <div class="module-label">子任务信息</div>
+            <div class="card">
+              <div class="card-title">子任务 1 · Principal 内部调拨</div>
+              <div class="field-grid">
+                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">FST2000012</div></div>
+                <div class="field-cell"><div class="cell-label">子任务类型</div><div class="cell-value">Principal 内部调拨</div></div>
+                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
+                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-28 14:20:01</div></div>
+                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value">2026-06-28 14:28:30</div></div>
+                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">SG Principal 内部调拨银行流水 ID</div><div class="cell-value mono">DBS20260628701</div></div>
+                <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal X</div></div>
+                <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">…4821</div></div>
+                <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">Principal Y</div></div>
+                <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">…7720</div></div>
+                <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">子任务 2 · 与上游结算</div>
+              <div class="field-grid">
+                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">FST2000013</div></div>
+                <div class="field-cell"><div class="cell-label">子任务类型</div><div class="cell-value">与上游结算</div></div>
+                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-error">失败</span></div></div>
+                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-28 14:28:35</div></div>
+                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value" style="white-space:normal;line-height:1.45;color:#991B1B;">API 请求超时，银行终态未知</div></div>
+                <div class="field-cell"><div class="cell-label">与上游结算银行流水 ID</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal Y</div></div>
+                <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">…7720</div></div>
+                <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">OKX Funding</div></div>
+                <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">…9012</div></div>
+                <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">子任务 3 · 与上游结算<span class="subtask-count">第 2 次重试成功</span></div>
+              <div class="field-grid">
+                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">FST2000014</div></div>
+                <div class="field-cell"><div class="cell-label">子任务类型</div><div class="cell-value">与上游结算</div></div>
+                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
+                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-28 14:35:08</div></div>
+                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value">2026-06-28 14:40:10</div></div>
+                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">与上游结算银行流水 ID</div><div class="cell-value mono">DBS20260628702</div></div>
+                <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal Y</div></div>
+                <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">…7720</div></div>
+                <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">OKX Funding</div></div>
+                <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">…9012</div></div>
+                <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">子任务 4 · 上游账户调拨</div>
+              <div class="field-grid">
+                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">FST2000015</div></div>
+                <div class="field-cell"><div class="cell-label">子任务类型</div><div class="cell-value">上游账户调拨</div></div>
+                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
+                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-28 14:40:12</div></div>
+                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value">2026-06-28 14:48:14</div></div>
+                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">上游账户调拨 ID</div><div class="cell-value mono">OKX-TRF-20260628-0088</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">任务变更记录</div>
+            <div class="timeline">
+              <div class="tl-item">
+                <div class="tl-dot"></div>
+                <div class="tl-time">2026-06-28 14:48:15</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">FS1000012</span></div>
+                <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-success">已完成</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot"></div>
+                <div class="tl-time">2026-06-28 14:48:14</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">上游账户调拨</span><span class="tl-ref-id mono">FST2000015</span></div>
+                <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-success">完成</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot warn"></div>
+                <div class="tl-time">2026-06-28 14:40:12</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">上游账户调拨</span><span class="tl-ref-id mono">FST2000015</span></div>
+                <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot"></div>
+                <div class="tl-time">2026-06-28 14:40:10</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">与上游结算</span><span class="tl-ref-id mono">FST2000014</span></div>
+                <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-success">完成</span></div>
+                <div class="tl-operator">操作人：System · 第 2 次重试</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot warn"></div>
+                <div class="tl-time">2026-06-28 14:35:08</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">与上游结算</span><span class="tl-ref-id mono">FST2000014</span></div>
+                <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System · 第 2 次重试</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot err"></div>
+                <div class="tl-time">2026-06-28 14:32:20</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">与上游结算</span><span class="tl-ref-id mono">FST2000013</span></div>
+                <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-error">失败</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot warn"></div>
+                <div class="tl-time">2026-06-28 14:28:35</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">与上游结算</span><span class="tl-ref-id mono">FST2000013</span></div>
+                <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System · 第 1 次请求</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot"></div>
+                <div class="tl-time">2026-06-28 14:28:30</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">Principal 内部调拨</span><span class="tl-ref-id mono">FST2000012</span></div>
+                <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-success">完成</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot muted"></div>
+                <div class="tl-time">2026-06-28 14:20:01</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">Principal 内部调拨</span><span class="tl-ref-id mono">FST2000012</span></div>
+                <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot muted"></div>
+                <div class="tl-time">2026-06-28 14:20:00</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">FS1000012</span></div>
+                <div class="tl-status"><span class="tl-init">创建任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="stl-detail-retry-exhausted" class="hidden">
+          <div class="detail-header">
+            <button class="back-btn" onclick="showStlList()">←</button>
+            <h1 class="page-title"><span class="mono">FS1000018</span> 应收任务</h1>
+            <span class="tag tag-warning">待处理</span>
+            <div class="detail-header-actions">
+              <button class="btn btn-primary">重试</button>
+            </div>
+          </div>
+          <div class="detail-alert">与上游结算子任务均已失败且已达重试上限；主任务保持「待处理」，需人工介入或手动重试后再发起新的子任务。</div>
+          <div class="card">
+            <div class="card-title">任务维度信息</div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">任务 ID</div><div class="cell-value mono">FS1000018</div></div>
+              <div class="field-cell"><div class="cell-label">交收系统指令 ID</div><div class="cell-value mono">INS-8846890</div></div>
+              <div class="field-cell"><div class="cell-label">交收系统任务发起时间</div><div class="cell-value">2026-06-27 09:12:00</div></div>
+              <div class="field-cell"><div class="cell-label">法币结算任务创建时间</div><div class="cell-value">2026-06-27 09:15:00</div></div>
+              <div class="field-cell"><div class="cell-label">法币结算任务完成时间</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">法币结算任务最近更新时间</div><div class="cell-value">2026-06-27 11:30:00</div></div>
+              <div class="field-cell"><div class="cell-label">任务方向</div><div class="cell-value">应收</div></div>
+              <div class="field-cell"><div class="cell-label">任务状态</div><div class="cell-value"><span class="tag tag-warning">待处理</span></div></div>
+              <div class="field-cell"><div class="cell-label">当前阶段</div><div class="cell-value">与上游结算</div></div>
+              <div class="field-cell"><div class="cell-label">金额</div><div class="cell-value">200,000.00</div></div>
+              <div class="field-cell"><div class="cell-label">币种</div><div class="cell-value">SGD</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">任务进度</div>
+            <div class="pipeline">
+              <div class="pipeline-inner">
+              <div class="pipe-node pipe-anchor">
+                <div class="pipe-circle done">起</div>
+                <div class="pipe-title">法币结算任务创建</div>
+                <div class="pipe-sub">主任务起点</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-27<br>09:15:00</span></div>
+                </div>
+              </div>
+              <div class="pipe-line done"></div>
+              <div class="pipe-node">
+                <div class="pipe-circle done">✓</div>
+                <div class="pipe-title">① Principal 内部调拨</div>
+                <div class="pipe-sub" style="color:#166534">子任务已完成</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-27<br>09:15:01</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">2026-06-27<br>09:28:00</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">子任务</span><span class="pipe-time-val">1</span></div>
+                </div>
+              </div>
+              <div class="pipe-line done"></div>
+              <div class="pipe-node">
+                <div class="pipe-circle failed">✗</div>
+                <div class="pipe-title">② 与上游结算</div>
+                <div class="pipe-sub" style="color:#991B1B">子任务均已失败 · 已达重试上限</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">2026-06-27<br>09:28:05</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">—</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">子任务</span><span class="pipe-time-val">3</span></div>
+                </div>
+              </div>
+              <div class="pipe-line"></div>
+              <div class="pipe-node">
+                <div class="pipe-circle pending">3</div>
+                <div class="pipe-title">③ 上游账户调拨</div>
+                <div class="pipe-sub">未开始</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">创建</span><span class="pipe-time-val">—</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">—</span></div>
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">子任务</span><span class="pipe-time-val">—</span></div>
+                </div>
+              </div>
+              <div class="pipe-line"></div>
+              <div class="pipe-node pipe-anchor">
+                <div class="pipe-circle pending">终</div>
+                <div class="pipe-title">法币结算任务完成</div>
+                <div class="pipe-sub">主任务终点</div>
+                <div class="pipe-times">
+                  <div class="pipe-time-row"><span class="pipe-time-lbl">完成</span><span class="pipe-time-val">—</span></div>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+          <div class="subtask-detail-wrap">
+            <div class="module-label">子任务信息<span class="subtask-count">与上游结算共 3 条 · 均已失败</span></div>
+            <div class="card">
+              <div class="card-title">子任务 1 · Principal 内部调拨</div>
+              <div class="field-grid">
+                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">FST2000018</div></div>
+                <div class="field-cell"><div class="cell-label">子任务类型</div><div class="cell-value">Principal 内部调拨</div></div>
+                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
+                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-27 09:15:01</div></div>
+                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value">2026-06-27 09:28:00</div></div>
+                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">SG Principal 内部调拨银行流水 ID</div><div class="cell-value mono">DBS20260627701</div></div>
+                <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">OKX Funding</div></div>
+                <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">…9012</div></div>
+                <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">Principal Y</div></div>
+                <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">…7720</div></div>
+                <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">子任务 2 · 与上游结算</div>
+              <div class="field-grid">
+                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">FST2000019</div></div>
+                <div class="field-cell"><div class="cell-label">子任务类型</div><div class="cell-value">与上游结算</div></div>
+                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-error">失败</span></div></div>
+                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-27 09:28:05</div></div>
+                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value" style="white-space:normal;line-height:1.45;color:#991B1B;">HTTP 504 Gateway Timeout，未收到银行 ACK</div></div>
+                <div class="field-cell"><div class="cell-label">与上游结算银行流水 ID</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal Y</div></div>
+                <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">…7720</div></div>
+                <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">OKX Funding</div></div>
+                <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">…9012</div></div>
+                <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">子任务 3 · 与上游结算</div>
+              <div class="field-grid">
+                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">FST2000020</div></div>
+                <div class="field-cell"><div class="cell-label">子任务类型</div><div class="cell-value">与上游结算</div></div>
+                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-error">失败</span></div></div>
+                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-27 10:15:00</div></div>
+                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value" style="white-space:normal;line-height:1.45;color:#991B1B;">银行返回 RJCT：收款账户信息不匹配</div></div>
+                <div class="field-cell"><div class="cell-label">与上游结算银行流水 ID</div><div class="cell-value mono">DBS20260627901</div></div>
+                <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal Y</div></div>
+                <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">…7720</div></div>
+                <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">OKX Funding</div></div>
+                <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">…9012</div></div>
+                <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">子任务 4 · 与上游结算</div>
+              <div class="field-grid">
+                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">FST2000021</div></div>
+                <div class="field-cell"><div class="cell-label">子任务类型</div><div class="cell-value">与上游结算</div></div>
+                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-error">失败</span></div></div>
+                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-27 11:05:00</div></div>
+                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value" style="white-space:normal;line-height:1.45;color:#991B1B;">银行返回 RJCT：余额不足（Insufficient Balance）</div></div>
+                <div class="field-cell"><div class="cell-label">与上游结算银行流水 ID</div><div class="cell-value muted">—</div></div>
+                <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal Y</div></div>
+                <div class="field-cell"><div class="cell-label">转出方银行账号</div><div class="cell-value mono">…7720</div></div>
+                <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">OKX Funding</div></div>
+                <div class="field-cell"><div class="cell-label">转入方银行账号</div><div class="cell-value mono">…9012</div></div>
+                <div class="field-cell"><div class="cell-label">银行转账方式</div><div class="cell-value">ACT</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">任务变更记录</div>
+            <div class="timeline">
+              <div class="tl-item">
+                <div class="tl-dot err"></div>
+                <div class="tl-time">2026-06-27 11:30:00</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">与上游结算</span><span class="tl-ref-id mono">FST2000021</span></div>
+                <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-error">失败</span></div>
+                <div class="tl-operator">操作人：System · 已达重试上限</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot warn"></div>
+                <div class="tl-time">2026-06-27 11:05:00</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">与上游结算</span><span class="tl-ref-id mono">FST2000021</span></div>
+                <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System · 第 3 次重试</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot err"></div>
+                <div class="tl-time">2026-06-27 10:58:33</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">与上游结算</span><span class="tl-ref-id mono">FST2000020</span></div>
+                <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-error">失败</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot warn"></div>
+                <div class="tl-time">2026-06-27 10:15:00</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">与上游结算</span><span class="tl-ref-id mono">FST2000020</span></div>
+                <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System · 第 2 次重试</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot err"></div>
+                <div class="tl-time">2026-06-27 09:45:00</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">与上游结算</span><span class="tl-ref-id mono">FST2000019</span></div>
+                <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-error">失败</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot warn"></div>
+                <div class="tl-time">2026-06-27 09:28:05</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">与上游结算</span><span class="tl-ref-id mono">FST2000019</span></div>
+                <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System · 第 1 次请求</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot"></div>
+                <div class="tl-time">2026-06-27 09:28:00</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">Principal 内部调拨</span><span class="tl-ref-id mono">FST2000018</span></div>
+                <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-success">完成</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot muted"></div>
+                <div class="tl-time">2026-06-27 09:15:01</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tag-scope tag-scope-scene">Principal 内部调拨</span><span class="tl-ref-id mono">FST2000018</span></div>
+                <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot muted"></div>
+                <div class="tl-time">2026-06-27 09:15:00</div>
+                <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">FS1000018</span></div>
+                <div class="tl-status"><span class="tl-init">创建任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+                <div class="tl-operator">操作人：System</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+<script>
+  function showModule(mod) {
+    document.getElementById('module-deposit').classList.toggle('hidden', mod !== 'deposit');
+    document.getElementById('module-settlement').classList.toggle('hidden', mod !== 'settlement');
+    document.getElementById('nav-dw').classList.toggle('active', mod === 'deposit');
+    document.getElementById('nav-stl').classList.toggle('active', mod === 'settlement');
+    document.getElementById('nav-dw-sub').classList.toggle('active', mod === 'deposit');
+    document.getElementById('nav-stl-sub').classList.toggle('active', mod === 'settlement');
+    if (mod === 'deposit') showDwList();
+    else showStlList();
+  }
+  function showDwList() {
+    document.getElementById('dw-list-section').classList.remove('hidden');
+    document.getElementById('dw-detail-section').classList.add('hidden');
+  }
+  function showDwDetail(variant) {
+    document.getElementById('dw-list-section').classList.add('hidden');
+    document.getElementById('dw-detail-section').classList.remove('hidden');
+    ['completed', 'pending', 'retry-exhausted', 'completed-outbound'].forEach(function (v) {
+      document.getElementById('detail-' + v).classList.toggle('hidden', v !== variant);
+    });
+  }
+  function showStlList() {
+    document.getElementById('stl-list-section').classList.remove('hidden');
+    document.getElementById('stl-detail-section').classList.add('hidden');
+  }
+  function showStlDetail(variant) {
+    document.getElementById('stl-list-section').classList.add('hidden');
+    document.getElementById('stl-detail-section').classList.remove('hidden');
+    ['internal-pending', 'upstream-pending', 'okx-pending', 'completed', 'retry-exhausted'].forEach(function (v) {
+      document.getElementById('stl-detail-' + v).classList.toggle('hidden', v !== variant);
+    });
+  }
+</script>
+</body>
+</html>
