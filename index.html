@@ -255,6 +255,8 @@
     <div class="sidebar-logo">Principal 资金管理系统</div>
     <div class="nav-item active" id="nav-dw" onclick="showModule('deposit')">出入金</div>
     <div class="nav-item nav-sub active" id="nav-dw-sub">列表</div>
+    <div class="nav-item" id="nav-digital" onclick="showModule('digital')">数字货币出入金</div>
+    <div class="nav-item nav-sub" id="nav-digital-sub">列表</div>
     <div class="nav-item" id="nav-crypto" onclick="showModule('crypto')">加密出入金</div>
     <div class="nav-item nav-sub" id="nav-crypto-sub">列表</div>
     <div class="nav-item" id="nav-stl" onclick="showModule('settlement')">法币结算</div>
@@ -763,6 +765,430 @@
     </section>
     </div>
 
+    <div id="module-digital" class="hidden">
+    <section id="digital-list-section">
+      <div class="breadcrumb">Principal 资金管理系统 &gt; <span>数字货币出入金</span></div>
+      <div class="page-header">
+        <h1 class="page-title">数字货币出入金</h1>
+      </div>
+
+      <div class="card">
+        <div class="filters">
+          <div class="field"><label>日期范围</label><input type="text" value="2026-06-24 ~ 2026-07-01" /></div>
+          <div class="field"><label>转出钱包</label><select><option>全部</option><option>Principal Hot · 0xA1…4821</option><option>Exchange Custody · 0xB2…1092</option></select></div>
+          <div class="field"><label>转入钱包</label><select><option>全部</option><option>Principal Hot · 0xA1…4821</option><option>Exchange Custody · 0xB2…1092</option></select></div>
+          <div class="field"><label>交易哈希</label><input type="text" placeholder="0x…" /></div>
+          <div class="field"><label>链网络</label><select><option>全部</option><option>Ethereum</option><option>BSC</option><option>Tron</option><option>Bitcoin</option></select></div>
+          <div class="field"><label>流水状态</label><select><option>全部</option><option>待处理</option><option>确认中</option><option>完成</option><option>失败</option></select></div>
+          <div class="field"><label>币种</label><select><option>全部</option><option>BTC</option><option>ETH</option><option>USDT</option><option>USDC</option></select></div>
+          <button class="btn btn-primary">筛选</button>
+          <button class="btn">重置</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>流水 ID</th><th>出入金方向</th><th>交易哈希</th><th>时间</th>
+              <th>金额</th><th>币种</th>
+              <th>转出方</th><th>转入方</th><th>链网络</th>
+              <th>流水状态</th><th class="col-action">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a class="link mono" href="#" onclick="showDigitalDetail('completed');return false;">CD1000005</a></td>
+              <td>入金</td>
+              <td class="mono">0x8f3a…c2e1</td>
+              <td>2026-07-01 10:22:15</td>
+              <td>125.50000000</td>
+              <td>ETH</td>
+              <td>Exchange Custody · 0xB2…1092</td>
+              <td>Principal Hot · 0xA1…4821</td>
+              <td>Ethereum</td>
+              <td><span class="tag tag-success">完成</span></td>
+              <td class="col-action"><a class="link" href="#" onclick="showDigitalDetail('completed');return false;">查看</a></td>
+            </tr>
+            <tr>
+              <td><a class="link mono" href="#" onclick="showDigitalDetail('pending');return false;">CD1000004</a></td>
+              <td>出金</td>
+              <td class="mono muted">—</td>
+              <td>2026-07-01 15:40:00</td>
+              <td>50,000.00</td>
+              <td>USDT</td>
+              <td>Principal Hot · 0xA1…4821</td>
+              <td>Exchange Custody · 0xB2…1092</td>
+              <td>Tron</td>
+              <td><span class="tag tag-warning">待处理</span></td>
+              <td class="col-action"><a class="link" href="#" onclick="showDigitalDetail('pending');return false;">查看</a></td>
+            </tr>
+            <tr>
+              <td><a class="link mono" href="#" onclick="showDigitalDetail('confirming');return false;">CD1000012</a></td>
+              <td>出金</td>
+              <td class="mono">0x4b7e…91af</td>
+              <td>2026-06-30 11:18:33</td>
+              <td>2.15000000</td>
+              <td>BTC</td>
+              <td>Principal Hot · 0xA1…4821</td>
+              <td>Exchange Custody · bc1q…7k2m</td>
+              <td>Bitcoin</td>
+              <td><span class="tag tag-info">确认中</span></td>
+              <td class="col-action"><a class="link" href="#" onclick="showDigitalDetail('confirming');return false;">查看</a></td>
+            </tr>
+            <tr>
+              <td><a class="link mono" href="#" onclick="showDigitalDetail('failed');return false;">CD1000009</a></td>
+              <td>出金</td>
+              <td class="mono">0x2c9d…e4b8</td>
+              <td>2026-06-29 16:05:42</td>
+              <td>80,000.00</td>
+              <td>USDC</td>
+              <td>Principal Hot · 0xA1…4821</td>
+              <td>Exchange Custody · 0xB2…1092</td>
+              <td>Ethereum</td>
+              <td><span class="tag tag-error">失败</span></td>
+              <td class="col-action"><a class="link" href="#" onclick="showDigitalDetail('failed');return false;">查看</a></td>
+            </tr>
+            <tr>
+              <td><a class="link mono" href="#" onclick="showDigitalDetail('completed');return false;">CD1000003</a></td>
+              <td>入金</td>
+              <td class="mono">0xa1f5…33d0</td>
+              <td>2026-06-28 09:12:08</td>
+              <td>200,000.00</td>
+              <td>USDT</td>
+              <td>Exchange Custody · 0xB2…1092</td>
+              <td>Principal Hot · 0xA1…4821</td>
+              <td>BSC</td>
+              <td><span class="tag tag-success">完成</span></td>
+              <td class="col-action"><a class="link" href="#" onclick="showDigitalDetail('completed');return false;">查看</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span>共 64 条 · 默认 20 条/页</span>
+          <span>‹ 1 2 3 … 4 ›</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="digital-detail-section" class="hidden">
+      <div class="breadcrumb">Principal 资金管理系统 &gt; 数字货币出入金 &gt; <span>详情</span></div>
+
+      <div id="digital-detail-completed">
+        <div class="detail-header">
+          <button class="back-btn" onclick="showDigitalList()" title="返回列表">←</button>
+          <h1 class="page-title"><span class="mono">CD1000005</span> 入金任务</h1>
+          <span class="tag tag-success">完成</span>
+        </div>
+
+        <div class="card">
+          <div class="card-title">主任务信息</div>
+          <div class="field-grid">
+            <div class="field-cell"><div class="cell-label">主任务 ID</div><div class="cell-value mono">CD1000005</div></div>
+            <div class="field-cell"><div class="cell-label">交易哈希</div><div class="cell-value mono">0x8f3a7c1b9e2d4f6a0c5e8b1d3f7a9c2e1</div></div>
+            <div class="field-cell"><div class="cell-label">任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
+            <div class="field-cell"><div class="cell-label">任务方向</div><div class="cell-value">入金</div></div>
+            <div class="field-cell"><div class="cell-label">金额</div><div class="cell-value">125.50000000</div></div>
+            <div class="field-cell"><div class="cell-label">币种</div><div class="cell-value">ETH</div></div>
+            <div class="field-cell"><div class="cell-label">链网络</div><div class="cell-value">Ethereum</div></div>
+            <div class="field-cell"><div class="cell-label">区块确认数</div><div class="cell-value">32 / 12 已达标</div></div>
+            <div class="field-cell"><div class="cell-label">任务创建时间</div><div class="cell-value">2026-07-01 10:21:58</div></div>
+            <div class="field-cell"><div class="cell-label">任务完成时间</div><div class="cell-value">2026-07-01 10:22:15</div></div>
+            <div class="field-cell"><div class="cell-label">最近更新时间</div><div class="cell-value">2026-07-01 10:22:15</div></div>
+            <div class="field-cell"><div class="cell-label">Gas 费用</div><div class="cell-value">0.002145 ETH</div></div>
+            <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Exchange Custody Wallet</div></div>
+            <div class="field-cell"><div class="cell-label">转出方钱包地址</div><div class="cell-value mono">0xB2c4d8e1f5a9…1092</div></div>
+            <div class="field-cell"><div class="cell-label">转出方 Principal 账户号码</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">Principal Hot Wallet</div></div>
+            <div class="field-cell"><div class="cell-label">转入方钱包地址</div><div class="cell-value mono">0xA1f7b3c9d2e8…4821</div></div>
+            <div class="field-cell"><div class="cell-label">转入方 Principal 账户号码</div><div class="cell-value mono">X-4821</div></div>
+            <div class="field-cell"><div class="cell-label">Token 合约地址</div><div class="cell-value muted">—（原生 ETH）</div></div>
+          </div>
+        </div>
+
+        <div class="subtask-detail-wrap">
+          <div class="module-label">子任务信息</div>
+          <div class="card">
+            <div class="card-title">子任务 1</div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">CST1000061</div></div>
+              <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
+              <div class="field-cell"><div class="cell-label">交易哈希</div><div class="cell-value mono">0x8f3a7c1b9e2d4f6a0c5e8b1d3f7a9c2e1</div></div>
+              <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-07-01 10:22:00</div></div>
+              <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value">2026-07-01 10:22:15</div></div>
+              <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">任务变更记录</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-time">2026-07-01 10:22:15</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">CD1000005</span></div>
+              <div class="tl-status"><span class="tag tag-info">确认中</span> <span class="arrow">→</span> <span class="tag tag-success">完成</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-time">2026-07-01 10:22:14</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">CST1000061</span></div>
+              <div class="tl-status"><span class="tag tag-info">确认中</span> <span class="arrow">→</span> <span class="tag tag-success">完成</span></div>
+              <div class="tl-operator">操作人：System · 区块确认达标</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot warn"></div>
+              <div class="tl-time">2026-07-01 10:22:05</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">CST1000061</span></div>
+              <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-info">确认中</span></div>
+              <div class="tl-operator">操作人：System · 链上已广播</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot muted"></div>
+              <div class="tl-time">2026-07-01 10:22:00</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">CST1000061</span></div>
+              <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot muted"></div>
+              <div class="tl-time">2026-07-01 10:21:58</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">CD1000005</span></div>
+              <div class="tl-status"><span class="tl-init">创建任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="digital-detail-pending" class="hidden">
+        <div class="detail-header">
+          <button class="back-btn" onclick="showDigitalList()">←</button>
+          <h1 class="page-title"><span class="mono">CD1000004</span> 出金任务</h1>
+          <span class="tag tag-warning">待处理</span>
+        </div>
+        <div class="card">
+          <div class="card-title">主任务信息</div>
+          <div class="field-grid">
+            <div class="field-cell"><div class="cell-label">主任务 ID</div><div class="cell-value mono">CD1000004</div></div>
+            <div class="field-cell"><div class="cell-label">交易哈希</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">任务状态</div><div class="cell-value"><span class="tag tag-warning">待处理</span></div></div>
+            <div class="field-cell"><div class="cell-label">任务方向</div><div class="cell-value">出金</div></div>
+            <div class="field-cell"><div class="cell-label">金额</div><div class="cell-value">50,000.00</div></div>
+            <div class="field-cell"><div class="cell-label">币种</div><div class="cell-value">USDT</div></div>
+            <div class="field-cell"><div class="cell-label">链网络</div><div class="cell-value">Tron</div></div>
+            <div class="field-cell"><div class="cell-label">区块确认数</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">任务创建时间</div><div class="cell-value">2026-07-01 15:40:00</div></div>
+            <div class="field-cell"><div class="cell-label">任务完成时间</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">最近更新时间</div><div class="cell-value">2026-07-01 15:40:01</div></div>
+            <div class="field-cell"><div class="cell-label">Gas 费用</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal Hot Wallet</div></div>
+            <div class="field-cell"><div class="cell-label">转出方钱包地址</div><div class="cell-value mono">0xA1f7b3c9d2e8…4821</div></div>
+            <div class="field-cell"><div class="cell-label">转出方 Principal 账户号码</div><div class="cell-value mono">X-4821</div></div>
+            <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">Exchange Custody Wallet</div></div>
+            <div class="field-cell"><div class="cell-label">转入方钱包地址</div><div class="cell-value mono">TXk9m2p4q7r1…1092</div></div>
+            <div class="field-cell"><div class="cell-label">转入方 Principal 账户号码</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">Token 合约地址</div><div class="cell-value mono">TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t</div></div>
+          </div>
+        </div>
+        <div class="subtask-detail-wrap">
+          <div class="module-label">子任务信息</div>
+          <div class="card">
+            <div class="card-title">子任务 1</div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">CST1000062</div></div>
+              <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-warning">待处理</span></div></div>
+              <div class="field-cell"><div class="cell-label">交易哈希</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-07-01 15:40:01</div></div>
+              <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">任务变更记录</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot warn"></div>
+              <div class="tl-time">2026-07-01 15:40:01</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">CST1000062</span></div>
+              <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot warn"></div>
+              <div class="tl-time">2026-07-01 15:40:00</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">CD1000004</span></div>
+              <div class="tl-status"><span class="tl-init">创建任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="digital-detail-confirming" class="hidden">
+        <div class="detail-header">
+          <button class="back-btn" onclick="showDigitalList()">←</button>
+          <h1 class="page-title"><span class="mono">CD1000012</span> 出金任务</h1>
+          <span class="tag tag-info">确认中</span>
+        </div>
+        <div class="card">
+          <div class="card-title">主任务信息</div>
+          <div class="field-grid">
+            <div class="field-cell"><div class="cell-label">主任务 ID</div><div class="cell-value mono">CD1000012</div></div>
+            <div class="field-cell"><div class="cell-label">交易哈希</div><div class="cell-value mono">0x4b7e91af2c8d3e5f1a6b0c9d4e7f2a8b</div></div>
+            <div class="field-cell"><div class="cell-label">任务状态</div><div class="cell-value"><span class="tag tag-info">确认中</span></div></div>
+            <div class="field-cell"><div class="cell-label">任务方向</div><div class="cell-value">出金</div></div>
+            <div class="field-cell"><div class="cell-label">金额</div><div class="cell-value">2.15000000</div></div>
+            <div class="field-cell"><div class="cell-label">币种</div><div class="cell-value">BTC</div></div>
+            <div class="field-cell"><div class="cell-label">链网络</div><div class="cell-value">Bitcoin</div></div>
+            <div class="field-cell"><div class="cell-label">区块确认数</div><div class="cell-value">2 / 3</div></div>
+            <div class="field-cell"><div class="cell-label">任务创建时间</div><div class="cell-value">2026-06-30 11:18:00</div></div>
+            <div class="field-cell"><div class="cell-label">任务完成时间</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">最近更新时间</div><div class="cell-value">2026-06-30 11:35:20</div></div>
+            <div class="field-cell"><div class="cell-label">网络手续费</div><div class="cell-value">0.00004500 BTC</div></div>
+            <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal Hot Wallet</div></div>
+            <div class="field-cell"><div class="cell-label">转出方钱包地址</div><div class="cell-value mono">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</div></div>
+            <div class="field-cell"><div class="cell-label">转出方 Principal 账户号码</div><div class="cell-value mono">X-4821</div></div>
+            <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">Exchange Custody Wallet</div></div>
+            <div class="field-cell"><div class="cell-label">转入方钱包地址</div><div class="cell-value mono">bc1q…7k2m</div></div>
+            <div class="field-cell"><div class="cell-label">转入方 Principal 账户号码</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">Token 合约地址</div><div class="cell-value muted">—（原生 BTC）</div></div>
+          </div>
+        </div>
+        <div class="subtask-detail-wrap">
+          <div class="module-label">子任务信息</div>
+          <div class="card">
+            <div class="card-title">子任务 1</div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">CST1000055</div></div>
+              <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-info">确认中</span></div></div>
+              <div class="field-cell"><div class="cell-label">交易哈希</div><div class="cell-value mono">0x4b7e91af2c8d3e5f1a6b0c9d4e7f2a8b</div></div>
+              <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-30 11:18:05</div></div>
+              <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">任务变更记录</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot warn"></div>
+              <div class="tl-time">2026-06-30 11:20:10</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">CST1000055</span></div>
+              <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-info">确认中</span></div>
+              <div class="tl-operator">操作人：System · 链上已广播</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot muted"></div>
+              <div class="tl-time">2026-06-30 11:18:05</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">CST1000055</span></div>
+              <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot muted"></div>
+              <div class="tl-time">2026-06-30 11:18:00</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">CD1000012</span></div>
+              <div class="tl-status"><span class="tl-init">创建任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="digital-detail-failed" class="hidden">
+        <div class="detail-header">
+          <button class="back-btn" onclick="showDigitalList()">←</button>
+          <h1 class="page-title"><span class="mono">CD1000009</span> 出金任务</h1>
+          <span class="tag tag-error">失败</span>
+          <div class="detail-header-actions">
+            <button class="btn btn-primary">重试</button>
+          </div>
+        </div>
+        <div class="detail-alert">链上交易失败；主任务标记为「失败」，需人工介入或手动重试后再发起新的子任务。</div>
+        <div class="card">
+          <div class="card-title">主任务信息</div>
+          <div class="field-grid">
+            <div class="field-cell"><div class="cell-label">主任务 ID</div><div class="cell-value mono">CD1000009</div></div>
+            <div class="field-cell"><div class="cell-label">交易哈希</div><div class="cell-value mono">0x2c9de4b81a7f3c5e9b0d2f4a6c8e1b3d</div></div>
+            <div class="field-cell"><div class="cell-label">任务状态</div><div class="cell-value"><span class="tag tag-error">失败</span></div></div>
+            <div class="field-cell"><div class="cell-label">任务方向</div><div class="cell-value">出金</div></div>
+            <div class="field-cell"><div class="cell-label">金额</div><div class="cell-value">80,000.00</div></div>
+            <div class="field-cell"><div class="cell-label">币种</div><div class="cell-value">USDC</div></div>
+            <div class="field-cell"><div class="cell-label">链网络</div><div class="cell-value">Ethereum</div></div>
+            <div class="field-cell"><div class="cell-label">区块确认数</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">任务创建时间</div><div class="cell-value">2026-06-29 16:05:00</div></div>
+            <div class="field-cell"><div class="cell-label">任务完成时间</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">最近更新时间</div><div class="cell-value">2026-06-29 16:12:30</div></div>
+            <div class="field-cell"><div class="cell-label">Gas 费用</div><div class="cell-value">0.004820 ETH</div></div>
+            <div class="field-cell"><div class="cell-label">转出方名称</div><div class="cell-value">Principal Hot Wallet</div></div>
+            <div class="field-cell"><div class="cell-label">转出方钱包地址</div><div class="cell-value mono">0xA1f7b3c9d2e8…4821</div></div>
+            <div class="field-cell"><div class="cell-label">转出方 Principal 账户号码</div><div class="cell-value mono">X-4821</div></div>
+            <div class="field-cell"><div class="cell-label">转入方名称</div><div class="cell-value">Exchange Custody Wallet</div></div>
+            <div class="field-cell"><div class="cell-label">转入方钱包地址</div><div class="cell-value mono">0xB2c4d8e1f5a9…1092</div></div>
+            <div class="field-cell"><div class="cell-label">转入方 Principal 账户号码</div><div class="cell-value muted">—</div></div>
+            <div class="field-cell"><div class="cell-label">Token 合约地址</div><div class="cell-value mono">0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48</div></div>
+          </div>
+        </div>
+        <div class="subtask-detail-wrap">
+          <div class="module-label">子任务信息</div>
+          <div class="card">
+            <div class="card-title">子任务 1</div>
+            <div class="field-grid">
+              <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">CST1000048</div></div>
+              <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-error">失败</span></div></div>
+              <div class="field-cell"><div class="cell-label">交易哈希</div><div class="cell-value mono">0x2c9de4b81a7f3c5e9b0d2f4a6c8e1b3d</div></div>
+              <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-29 16:05:05</div></div>
+              <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
+              <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value" style="white-space:normal;line-height:1.45;color:#991B1B;">链上交易 reverted：ERC20 transfer amount exceeds balance</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">任务变更记录</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot err"></div>
+              <div class="tl-time">2026-06-29 16:12:30</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">CD1000009</span></div>
+              <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-error">失败</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot err"></div>
+              <div class="tl-time">2026-06-29 16:12:28</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">CST1000048</span></div>
+              <div class="tl-status"><span class="tag tag-info">确认中</span> <span class="arrow">→</span> <span class="tag tag-error">失败</span></div>
+              <div class="tl-operator">操作人：System · 交易 reverted</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot warn"></div>
+              <div class="tl-time">2026-06-29 16:05:20</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">CST1000048</span></div>
+              <div class="tl-status"><span class="tag tag-warning">待处理</span> <span class="arrow">→</span> <span class="tag tag-info">确认中</span></div>
+              <div class="tl-operator">操作人：System · 链上已广播</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot muted"></div>
+              <div class="tl-time">2026-06-29 16:05:05</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-sub">子任务</span><span class="tl-ref-id mono">CST1000048</span></div>
+              <div class="tl-status"><span class="tl-init">创建子任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot muted"></div>
+              <div class="tl-time">2026-06-29 16:05:00</div>
+              <div class="tl-scope"><span class="tag-scope tag-scope-master">主任务</span><span class="tl-ref-id mono">CD1000009</span></div>
+              <div class="tl-status"><span class="tl-init">创建任务</span> <span class="arrow">→</span> <span class="tag tag-warning">待处理</span></div>
+              <div class="tl-operator">操作人：System</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    </div>
+
     <div id="module-crypto" class="hidden">
       <section id="crypto-list-section">
         <div class="breadcrumb">Principal 资金管理系统 &gt; <span>加密出入金</span></div>
@@ -907,20 +1333,6 @@
             </div>
           </div>
 
-          <div class="subtask-detail-wrap">
-            <div class="module-label">子任务信息</div>
-            <div class="card">
-              <div class="card-title">子任务 1 · 链上入账确认</div>
-              <div class="field-grid">
-                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">CST1000021</div></div>
-                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
-                <div class="field-cell"><div class="cell-label">交易哈希/ Ref</div><div class="cell-value mono">0x8a2f…c91d</div></div>
-                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-07-01 11:40:05</div></div>
-                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value">2026-07-01 11:42:18</div></div>
-                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
-              </div>
-            </div>
-          </div>
 
           <div class="card">
             <div class="card-title">任务变更记录</div>
@@ -987,20 +1399,6 @@
               <div class="field-cell"><div class="cell-label">Memo / Tag</div><div class="cell-value muted">—</div></div>
             </div>
           </div>
-          <div class="subtask-detail-wrap">
-            <div class="module-label">子任务信息</div>
-            <div class="card">
-              <div class="card-title">子任务 1 · Broadcast Withdraw</div>
-              <div class="field-grid">
-                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">CST1000022</div></div>
-                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-warning">待处理</span></div></div>
-                <div class="field-cell"><div class="cell-label">交易哈希/ Ref</div><div class="cell-value muted">—</div></div>
-                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-07-01 15:20:01</div></div>
-                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
-                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
-              </div>
-            </div>
-          </div>
           <div class="card">
             <div class="card-title">任务变更记录</div>
             <div class="timeline">
@@ -1050,31 +1448,6 @@
               <div class="field-cell"><div class="cell-label">转入方地址</div><div class="cell-value mono">0x9c1e…44a2</div></div>
               <div class="field-cell"><div class="cell-label">转入方 Principal 账户</div><div class="cell-value muted">—</div></div>
               <div class="field-cell"><div class="cell-label">Memo / Tag</div><div class="cell-value muted">—</div></div>
-            </div>
-          </div>
-          <div class="subtask-detail-wrap">
-            <div class="module-label">子任务信息</div>
-            <div class="card">
-              <div class="card-title">子任务 1 · Broadcast Withdraw</div>
-              <div class="field-grid">
-                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">CST1000030</div></div>
-                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
-                <div class="field-cell"><div class="cell-label">交易哈希/ Ref</div><div class="cell-value mono">0x3c7e…b204</div></div>
-                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-30 09:12:02</div></div>
-                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value">2026-06-30 09:12:40</div></div>
-                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-title">子任务 2 · 等待链上确认</div>
-              <div class="field-grid">
-                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">CST1000031</div></div>
-                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-info">确认中</span></div></div>
-                <div class="field-cell"><div class="cell-label">交易哈希/ Ref</div><div class="cell-value mono">0x3c7e…b204</div></div>
-                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-30 09:12:41</div></div>
-                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value muted">—</div></div>
-                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
-              </div>
             </div>
           </div>
           <div class="card">
@@ -1142,31 +1515,6 @@
               <div class="field-cell"><div class="cell-label">Memo / Tag</div><div class="cell-value muted">—</div></div>
             </div>
           </div>
-          <div class="subtask-detail-wrap">
-            <div class="module-label">子任务信息</div>
-            <div class="card">
-              <div class="card-title">子任务 1 · Broadcast Withdraw</div>
-              <div class="field-grid">
-                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">CST1000025</div></div>
-                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
-                <div class="field-cell"><div class="cell-label">交易哈希/ Ref</div><div class="cell-value mono">TXk9m…p4q7</div></div>
-                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-28 16:05:02</div></div>
-                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value">2026-06-28 16:05:30</div></div>
-                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-title">子任务 2 · 等待链上确认</div>
-              <div class="field-grid">
-                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">CST1000026</div></div>
-                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-success">完成</span></div></div>
-                <div class="field-cell"><div class="cell-label">交易哈希/ Ref</div><div class="cell-value mono">TXk9m…p4q7</div></div>
-                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-28 16:05:31</div></div>
-                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value">2026-06-28 16:08:44</div></div>
-                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value muted">—</div></div>
-              </div>
-            </div>
-          </div>
           <div class="card">
             <div class="card-title">任务变更记录</div>
             <div class="timeline">
@@ -1224,20 +1572,6 @@
               <div class="field-cell"><div class="cell-label">转入方地址</div><div class="cell-value mono">0xa3f2…19d0</div></div>
               <div class="field-cell"><div class="cell-label">转入方 Principal 账户</div><div class="cell-value mono">X-CRYPTO-01</div></div>
               <div class="field-cell"><div class="cell-label">Memo / Tag</div><div class="cell-value muted">—</div></div>
-            </div>
-          </div>
-          <div class="subtask-detail-wrap">
-            <div class="module-label">子任务信息</div>
-            <div class="card">
-              <div class="card-title">子任务 1 · 链上入账确认</div>
-              <div class="field-grid">
-                <div class="field-cell"><div class="cell-label">子任务 ID</div><div class="cell-value mono">CST1000028</div></div>
-                <div class="field-cell"><div class="cell-label">子任务状态</div><div class="cell-value"><span class="tag tag-error">失败</span></div></div>
-                <div class="field-cell"><div class="cell-label">交易哈希/ Ref</div><div class="cell-value mono">0xf1d0…8ae3</div></div>
-                <div class="field-cell"><div class="cell-label">子任务创建时间</div><div class="cell-value">2026-06-29 13:50:02</div></div>
-                <div class="field-cell"><div class="cell-label">子任务完成时间</div><div class="cell-value">2026-06-29 13:55:01</div></div>
-                <div class="field-cell"><div class="cell-label">子任务失败原因</div><div class="cell-value">交易回滚：receipt status = 0</div></div>
-              </div>
             </div>
           </div>
           <div class="card">
@@ -2306,15 +2640,19 @@
 <script>
   function showModule(mod) {
     document.getElementById('module-deposit').classList.toggle('hidden', mod !== 'deposit');
+    document.getElementById('module-digital').classList.toggle('hidden', mod !== 'digital');
     document.getElementById('module-crypto').classList.toggle('hidden', mod !== 'crypto');
     document.getElementById('module-settlement').classList.toggle('hidden', mod !== 'settlement');
     document.getElementById('nav-dw').classList.toggle('active', mod === 'deposit');
+    document.getElementById('nav-digital').classList.toggle('active', mod === 'digital');
     document.getElementById('nav-crypto').classList.toggle('active', mod === 'crypto');
     document.getElementById('nav-stl').classList.toggle('active', mod === 'settlement');
     document.getElementById('nav-dw-sub').classList.toggle('active', mod === 'deposit');
+    document.getElementById('nav-digital-sub').classList.toggle('active', mod === 'digital');
     document.getElementById('nav-crypto-sub').classList.toggle('active', mod === 'crypto');
     document.getElementById('nav-stl-sub').classList.toggle('active', mod === 'settlement');
     if (mod === 'deposit') showDwList();
+    else if (mod === 'digital') showDigitalList();
     else if (mod === 'crypto') showCryptoList();
     else showStlList();
   }
@@ -2327,6 +2665,17 @@
     document.getElementById('dw-detail-section').classList.remove('hidden');
     ['completed', 'pending', 'retry-exhausted', 'completed-outbound'].forEach(function (v) {
       document.getElementById('detail-' + v).classList.toggle('hidden', v !== variant);
+    });
+  }
+  function showDigitalList() {
+    document.getElementById('digital-list-section').classList.remove('hidden');
+    document.getElementById('digital-detail-section').classList.add('hidden');
+  }
+  function showDigitalDetail(variant) {
+    document.getElementById('digital-list-section').classList.add('hidden');
+    document.getElementById('digital-detail-section').classList.remove('hidden');
+    ['completed', 'pending', 'confirming', 'failed'].forEach(function (v) {
+      document.getElementById('digital-detail-' + v).classList.toggle('hidden', v !== variant);
     });
   }
   function showCryptoList() {
