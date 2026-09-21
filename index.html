@@ -2459,7 +2459,7 @@
     body.innerHTML = transactions.map(function (transaction) {
       return '<tr>' +
         '<td class="mono">' + transaction.cycle + '</td>' +
-        '<td><a class="link mono" href="#" onclick="showCryptoDetail(\\'' + transaction.id + '\\');return false;">' + transaction.id + '</a></td>' +
+        '<td><a class="link mono" href="#" onclick="showCryptoDetail(\'' + transaction.id + '\');return false;">' + transaction.id + '</a></td>' +
         '<td>' + transaction.fromWallet + '</td>' +
         '<td>' + transaction.toWallet + '</td>' +
         '<td>' + transaction.currency + '</td>' +
