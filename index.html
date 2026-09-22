@@ -1314,6 +1314,7 @@
         <div class="card">
           <div class="filters">
             <div class="field"><label>Wallet</label><select id="cdw-filter-wallet"><option value="">All</option><option>SG Client Account (Bitgo Go/Ac)</option><option>Customer Omnibus Wallet (Bitgo Go A/c)</option></select></div>
+            <div class="field"><label>Transaction Type</label><select id="cdw-filter-type"><option value="">All</option><option>Deposit</option><option>Withdrawal</option></select></div>
             <div class="field">
               <label>Last Updated Date Range</label>
               <div class="date-range">
@@ -1324,8 +1325,6 @@
             </div>
             <div class="field"><label>Settlement Cycle</label><select id="cdw-filter-cycle"><option value="">All</option><option>SC-20260701-A</option><option>SC-20260630-A</option><option>SC-20260628-A</option></select></div>
             <div class="field"><label>Status</label><select id="cdw-filter-status"><option value="">All</option><option>Pending</option><option>Clearing</option><option>Transferring</option><option>Withdrawing</option><option>Successful</option><option>Failed</option></select></div>
-            <div class="field"><label>From Wallet</label><select id="cdw-filter-from"><option value="">All</option><option>SG Client Account (Bitgo Go/Ac)</option><option>Customer Omnibus Wallet (Bitgo Go A/c)</option></select></div>
-            <div class="field"><label>To Wallet</label><select id="cdw-filter-to"><option value="">All</option><option>SG Client Account (Bitgo Go/Ac)</option><option>Customer Omnibus Wallet (Bitgo Go A/c)</option></select></div>
             <div class="field"><label>Currency</label><select id="cdw-filter-currency"><option value="">All</option><option>BTC</option><option>ETH</option><option>USDT</option><option>USDC</option></select></div>
             <div class="field"><label>Reference ID</label><input id="cdw-filter-reference" type="text" placeholder="Bitgo Wallet Transaction ID" /></div>
             <button class="btn btn-primary" onclick="filterCdwTransactions()">Search</button>
@@ -2840,24 +2839,22 @@
 
   function filterCdwTransactions() {
     var wallet = document.getElementById('cdw-filter-wallet').value;
+    var transactionType = document.getElementById('cdw-filter-type').value;
     var dateFrom = document.getElementById('cdw-filter-date-from').value;
     var dateTo = document.getElementById('cdw-filter-date-to').value;
     var cycle = document.getElementById('cdw-filter-cycle').value;
     var status = document.getElementById('cdw-filter-status').value;
-    var fromWallet = document.getElementById('cdw-filter-from').value;
-    var toWallet = document.getElementById('cdw-filter-to').value;
     var currency = document.getElementById('cdw-filter-currency').value;
     var reference = document.getElementById('cdw-filter-reference').value.trim().toLowerCase();
 
     filteredCdwTransactions = cdwTransactions.filter(function (transaction) {
       var updatedDate = transaction.updatedTime.slice(0, 10);
       return (!wallet || transaction.wallet === wallet) &&
+        (!transactionType || transaction.transactionType === transactionType) &&
         (!dateFrom || updatedDate >= dateFrom) &&
         (!dateTo || updatedDate <= dateTo) &&
         (!cycle || transaction.cycle === cycle) &&
         (!status || transaction.status === status) &&
-        (!fromWallet || transaction.fromWallet === fromWallet) &&
-        (!toWallet || transaction.toWallet === toWallet) &&
         (!currency || transaction.currency === currency) &&
         (!reference || transaction.referenceId.toLowerCase().indexOf(reference) !== -1);
     });
@@ -2865,8 +2862,8 @@
   }
 
   function clearCdwFilters() {
-    ['cdw-filter-wallet', 'cdw-filter-date-from', 'cdw-filter-date-to', 'cdw-filter-cycle',
-      'cdw-filter-status', 'cdw-filter-from', 'cdw-filter-to', 'cdw-filter-currency',
+    ['cdw-filter-wallet', 'cdw-filter-type', 'cdw-filter-date-from', 'cdw-filter-date-to',
+      'cdw-filter-cycle', 'cdw-filter-status', 'cdw-filter-currency',
       'cdw-filter-reference'].forEach(function (id) {
       document.getElementById(id).value = '';
     });
