@@ -158,7 +158,13 @@
     .date-range-separator { color: var(--text-secondary); }
     .empty-state { padding: 32px 16px; text-align: center; color: var(--text-secondary); }
     .status-history td:first-child { width: 220px; }
-    table { width: 100%; border-collapse: collapse; table-layout: auto; }
+    .submodule-select {
+      height: 32px; border: 1px solid var(--border); border-radius: 6px;
+      padding: 0 10px; min-width: 160px; background: #fff;
+    }
+    .page-note {
+      margin: -8px 0 16px; font-size: 13px; color: var(--text-secondary); line-height: 1.5;
+    }    table { width: 100%; border-collapse: collapse; table-layout: auto; }
     th {
       background: #F9FAFB; text-align: left; padding: 10px 16px; font-weight: 500;
       font-size: 13px; color: var(--text-secondary); border-bottom: 1px solid var(--border);
@@ -268,6 +274,8 @@
     <div class="nav-item nav-sub" id="nav-digital-sub">列表</div>
     <div class="nav-item" id="nav-crypto" onclick="showModule('crypto')">加密出入金</div>
     <div class="nav-item nav-sub" id="nav-crypto-sub">列表</div>
+    <div class="nav-item" id="nav-cdw" onclick="showModule('cdw')">Crypto Deposit/Withdrawal</div>
+    <div class="nav-item nav-sub" id="nav-cdw-sub" onclick="showModule('cdw')">Principal</div>
     <div class="nav-item" id="nav-stl" onclick="showModule('settlement')">法币结算</div>
     <div class="nav-item nav-sub" id="nav-stl-sub">列表</div>
     <div class="nav-item">数据汇总</div>
@@ -1284,6 +1292,102 @@
             <tbody id="crypto-status-history"></tbody>
           </table>
         </div>
+      </section>
+    </div>
+
+    <div id="module-cdw" class="hidden">
+      <section id="cdw-list-section">
+        <div class="breadcrumb">Principal 资金管理系统 &gt; Crypto Deposit/Withdrawal &gt; <span>Principal</span></div>
+        <div class="page-header page-header-row">
+          <div>
+            <h1 class="page-title">Crypto Deposit/Withdrawal</h1>
+          </div>
+          <div class="page-header-actions">
+            <select id="cdw-submodule" class="submodule-select" onchange="onCdwSubmoduleChange()">
+              <option value="principal" selected>Principal</option>
+            </select>
+            <button class="btn" onclick="downloadCdwCsv()">Download CSV</button>
+          </div>
+        </div>
+        <div class="page-note">Principal activities only. Excludes Principal settlement activities (PRD §5.11). Each Transaction ID appears as a matching Deposit / Withdrawal pair across SG Client Account (Bitgo Go/Ac) and Customer Omnibus Wallet (Bitgo Go A/c).</div>
+
+        <div class="card">
+          <div class="filters">
+            <div class="field"><label>Wallet</label><select id="cdw-filter-wallet"><option value="">All</option><option>SG Client Account (Bitgo Go/Ac)</option><option>Customer Omnibus Wallet (Bitgo Go A/c)</option></select></div>
+            <div class="field"><label>Transaction Type</label><select id="cdw-filter-type"><option value="">All</option><option>Deposit</option><option>Withdrawal</option></select></div>
+            <div class="field">
+              <label>Last Updated Date Range</label>
+              <div class="date-range">
+                <input id="cdw-filter-date-from" type="date" value="2026-06-24" />
+                <span class="date-range-separator">—</span>
+                <input id="cdw-filter-date-to" type="date" value="2026-07-01" />
+              </div>
+            </div>
+            <div class="field"><label>Settlement Cycle</label><select id="cdw-filter-cycle"><option value="">All</option><option>SC-20260701-A</option><option>SC-20260630-A</option><option>SC-20260628-A</option></select></div>
+            <div class="field"><label>Status</label><select id="cdw-filter-status"><option value="">All</option><option>Pending</option><option>Clearing</option><option>Transferring</option><option>Withdrawing</option><option>Successful</option><option>Failed</option></select></div>
+            <div class="field"><label>Currency</label><select id="cdw-filter-currency"><option value="">All</option><option>BTC</option><option>ETH</option><option>USDT</option><option>USDC</option></select></div>
+            <div class="field"><label>Reference ID</label><input id="cdw-filter-reference" type="text" placeholder="Bitgo Wallet Transaction ID" /></div>
+            <button class="btn btn-primary" onclick="filterCdwTransactions()">Search</button>
+            <button class="btn" onclick="clearCdwFilters()">Clear</button>
+          </div>
+          <table id="cdw-transaction-table">
+            <thead>
+              <tr>
+                <th>Wallet</th>
+                <th>Transaction Type</th>
+                <th>Settlement Cycle</th>
+                <th>Transaction ID</th>
+                <th>From Wallet</th>
+                <th>To Wallet</th>
+                <th>Currency</th>
+                <th>Amount</th>
+                <th>Created Time</th>
+                <th>Last Updated Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="cdw-transaction-body"></tbody>
+          </table>
+          <div id="cdw-empty-state" class="empty-state hidden">No transactions match the selected filters.</div>
+          <div class="pagination">
+            <span id="cdw-result-count">0 transactions</span>
+            <span>‹ 1 ›</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="cdw-detail-section" class="hidden">
+        <div class="breadcrumb">Principal 资金管理系统 &gt; Crypto Deposit/Withdrawal &gt; Principal &gt; <span>Details</span></div>
+        <div class="detail-header">
+          <button class="back-btn" onclick="showCdwList()" title="Back to list">←</button>
+          <h1 class="page-title"><span id="cdw-detail-title-id" class="mono"></span> Details</h1>
+          <span id="cdw-detail-status" class="tag"></span>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Transaction Details</div>
+          <div class="field-grid">
+            <div class="field-cell"><div class="cell-label">Settlement Cycle</div><div id="cdw-detail-cycle" class="cell-value mono"></div></div>
+            <div class="field-cell"><div class="cell-label">Transaction ID</div><div id="cdw-detail-id" class="cell-value mono"></div></div>
+            <div class="field-cell"><div class="cell-label">Status</div><div id="cdw-detail-status-field" class="cell-value"></div></div>
+            <div class="field-cell"><div class="cell-label">From Wallet</div><div id="cdw-detail-from" class="cell-value"></div></div>
+            <div class="field-cell"><div class="cell-label">To Wallet</div><div id="cdw-detail-to" class="cell-value"></div></div>
+            <div class="field-cell"><div class="cell-label">Currency</div><div id="cdw-detail-currency" class="cell-value"></div></div>
+            <div class="field-cell"><div class="cell-label">Amount</div><div id="cdw-detail-amount" class="cell-value"></div></div>
+            <div class="field-cell"><div class="cell-label">Reference ID</div><div id="cdw-detail-reference" class="cell-value mono"></div></div>
+            <div class="field-cell"><div class="cell-label">Gas Fee</div><div id="cdw-detail-gas-fee" class="cell-value"></div></div>
+            <div class="field-cell"><div class="cell-label">Gas Fee CCY</div><div id="cdw-detail-gas-currency" class="cell-value"></div></div>
+            <div class="field-cell"><div class="cell-label">Created Time</div><div id="cdw-detail-created" class="cell-value"></div></div>
+            <div class="field-cell"><div class="cell-label">Last Updated Time</div><div id="cdw-detail-updated" class="cell-value"></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Status Change Record</div>
+          <table class="status-history">
+            <thead><tr><th>Date / Time</th><th>Status Change</th></tr></thead>
+            <tbody id="cdw-status-history"></tbody>
+          </table>        </div>
       </section>
     </div>
 
@@ -2325,18 +2429,22 @@
     document.getElementById('module-deposit').classList.toggle('hidden', mod !== 'deposit');
     document.getElementById('module-digital').classList.toggle('hidden', mod !== 'digital');
     document.getElementById('module-crypto').classList.toggle('hidden', mod !== 'crypto');
+    document.getElementById('module-cdw').classList.toggle('hidden', mod !== 'cdw');
     document.getElementById('module-settlement').classList.toggle('hidden', mod !== 'settlement');
     document.getElementById('nav-dw').classList.toggle('active', mod === 'deposit');
     document.getElementById('nav-digital').classList.toggle('active', mod === 'digital');
     document.getElementById('nav-crypto').classList.toggle('active', mod === 'crypto');
+    document.getElementById('nav-cdw').classList.toggle('active', mod === 'cdw');
     document.getElementById('nav-stl').classList.toggle('active', mod === 'settlement');
     document.getElementById('nav-dw-sub').classList.toggle('active', mod === 'deposit');
     document.getElementById('nav-digital-sub').classList.toggle('active', mod === 'digital');
     document.getElementById('nav-crypto-sub').classList.toggle('active', mod === 'crypto');
+    document.getElementById('nav-cdw-sub').classList.toggle('active', mod === 'cdw');
     document.getElementById('nav-stl-sub').classList.toggle('active', mod === 'settlement');
     if (mod === 'deposit') showDwList();
     else if (mod === 'digital') showDigitalList();
     else if (mod === 'crypto') showCryptoList();
+    else if (mod === 'cdw') showCdwList();
     else showStlList();
   }
   function showDwList() {
@@ -2578,6 +2686,254 @@
     });
   }
   renderCryptoTable(cryptoTransactions);
-</script>
+
+  var CDW_SG = 'SG Client Account (Bitgo Go/Ac)';
+  var CDW_OMNI = 'Customer Omnibus Wallet (Bitgo Go A/c)';
+  var cdwTransfers = [
+    {
+      id: 'CD1000005', cycle: 'SC-20260701-A', currency: 'BTC', amount: '0.00000001',
+      direction: 'sg-to-omni', referenceId: 'Bitgo1234',
+      createdTime: '2026-07-01 11:40:02', updatedTime: '2026-07-01 11:42:18',
+      status: 'Successful',
+      history: [
+        ['2026-07-01 11:40:02', 'Created'],
+        ['2026-07-01 11:40:20', 'Pending'],
+        ['2026-07-01 11:41:08', 'Clearing'],
+        ['2026-07-01 11:42:18', 'Successful']
+      ]
+    },
+    {
+      id: 'CD1000004', cycle: 'SC-20260701-A', currency: 'USDT', amount: '85000.00000000',
+      direction: 'omni-to-sg', referenceId: 'Bitgo5678',
+      createdTime: '2026-07-01 15:20:00', updatedTime: '2026-07-01 15:20:01',
+      status: 'Pending',
+      history: [
+        ['2026-07-01 15:20:00', 'Created'],
+        ['2026-07-01 15:20:01', 'Pending']
+      ]
+    },
+    {
+      id: 'CD1000012', cycle: 'SC-20260630-A', currency: 'USDC', amount: '500000.00000000',
+      direction: 'sg-to-omni', referenceId: 'Bitgo9012',
+      createdTime: '2026-06-30 09:12:00', updatedTime: '2026-06-30 09:15:33',
+      status: 'Clearing',
+      history: [
+        ['2026-06-30 09:12:00', 'Created'],
+        ['2026-06-30 09:12:05', 'Pending'],
+        ['2026-06-30 09:15:33', 'Clearing']
+      ]
+    },
+    {
+      id: 'CD1000009', cycle: 'SC-20260630-A', currency: 'ETH', amount: '12.80000000',
+      direction: 'omni-to-sg', referenceId: 'Bitgo3456',
+      createdTime: '2026-06-30 08:30:00', updatedTime: '2026-06-30 08:33:44',
+      status: 'Transferring',
+      history: [
+        ['2026-06-30 08:30:00', 'Created'],
+        ['2026-06-30 08:30:04', 'Pending'],
+        ['2026-06-30 08:33:44', 'Transferring']
+      ]
+    },
+    {
+      id: 'CD1000008', cycle: 'SC-20260628-A', currency: 'BTC', amount: '1.25000000',
+      direction: 'sg-to-omni', referenceId: 'Bitgo7890',
+      createdTime: '2026-06-28 16:05:00', updatedTime: '2026-06-28 16:08:44',
+      status: 'Withdrawing',
+      history: [
+        ['2026-06-28 16:05:00', 'Created'],
+        ['2026-06-28 16:05:06', 'Pending'],
+        ['2026-06-28 16:08:44', 'Withdrawing']
+      ]
+    },
+    {
+      id: 'CD1000007', cycle: 'SC-20260628-A', currency: 'ETH', amount: '5.25000000',
+      direction: 'omni-to-sg', referenceId: 'Bitgo2468',
+      createdTime: '2026-06-28 13:50:00', updatedTime: '2026-06-28 13:55:01',
+      status: 'Failed',
+      history: [
+        ['2026-06-28 13:50:00', 'Created'],
+        ['2026-06-28 13:50:08', 'Pending'],
+        ['2026-06-28 13:55:01', 'Failed']
+      ]
+    }
+  ];
+
+  function buildCdwRows(transfers) {
+    var rows = [];
+    transfers.forEach(function (transfer) {
+      var fromWallet = transfer.direction === 'sg-to-omni' ? CDW_SG : CDW_OMNI;
+      var toWallet = transfer.direction === 'sg-to-omni' ? CDW_OMNI : CDW_SG;
+      rows.push({
+        wallet: fromWallet,
+        transactionType: 'Withdrawal',
+        cycle: transfer.cycle,
+        id: transfer.id,
+        fromWallet: '—',
+        toWallet: toWallet,
+        currency: transfer.currency,
+        amount: transfer.amount,
+        createdTime: transfer.createdTime,
+        updatedTime: transfer.updatedTime,
+        status: transfer.status,
+        referenceId: transfer.referenceId,
+        detailFrom: fromWallet,
+        detailTo: toWallet,
+        history: transfer.history
+      });
+      rows.push({
+        wallet: toWallet,
+        transactionType: 'Deposit',
+        cycle: transfer.cycle,
+        id: transfer.id,
+        fromWallet: fromWallet,
+        toWallet: '—',
+        currency: transfer.currency,
+        amount: transfer.amount,
+        createdTime: transfer.createdTime,
+        updatedTime: transfer.updatedTime,
+        status: transfer.status,
+        referenceId: transfer.referenceId,
+        detailFrom: fromWallet,
+        detailTo: toWallet,
+        history: transfer.history
+      });
+    });
+    return rows;
+  }
+
+  var cdwTransactions = buildCdwRows(cdwTransfers);
+  var filteredCdwTransactions = cdwTransactions.slice();
+
+  function cdwStatusClass(status) {
+    if (status === 'Successful') return 'tag-success';
+    if (status === 'Failed') return 'tag-error';
+    if (status === 'Pending' || status === 'Withdrawing') return 'tag-warning';
+    return 'tag-info';
+  }
+
+  function cdwStatusHtml(status) {
+    return '<span class="tag ' + cdwStatusClass(status) + '">' + status + '</span>';
+  }
+
+  function renderCdwTable(transactions) {
+    var body = document.getElementById('cdw-transaction-body');
+    body.innerHTML = transactions.map(function (transaction) {
+      return '<tr>' +
+        '<td>' + transaction.wallet + '</td>' +
+        '<td>' + transaction.transactionType + '</td>' +
+        '<td class="mono">' + transaction.cycle + '</td>' +
+        '<td><a class="link mono" href="#" onclick="showCdwDetail(\'' + transaction.id + '\');return false;">' + transaction.id + '</a></td>' +
+        '<td class="' + (transaction.fromWallet === '—' ? 'muted' : '') + '">' + transaction.fromWallet + '</td>' +
+        '<td class="' + (transaction.toWallet === '—' ? 'muted' : '') + '">' + transaction.toWallet + '</td>' +
+        '<td>' + transaction.currency + '</td>' +
+        '<td class="mono">' + transaction.amount + '</td>' +
+        '<td>' + transaction.createdTime + '</td>' +
+        '<td>' + transaction.updatedTime + '</td>' +
+        '<td>' + cdwStatusHtml(transaction.status) + '</td>' +
+      '</tr>';
+    }).join('');
+    document.getElementById('cdw-transaction-table').classList.toggle('hidden', transactions.length === 0);
+    document.getElementById('cdw-empty-state').classList.toggle('hidden', transactions.length !== 0);
+    document.getElementById('cdw-result-count').textContent = transactions.length + ' transaction' + (transactions.length === 1 ? '' : 's');
+  }
+
+  function filterCdwTransactions() {
+    var wallet = document.getElementById('cdw-filter-wallet').value;
+    var transactionType = document.getElementById('cdw-filter-type').value;
+    var dateFrom = document.getElementById('cdw-filter-date-from').value;
+    var dateTo = document.getElementById('cdw-filter-date-to').value;
+    var cycle = document.getElementById('cdw-filter-cycle').value;
+    var status = document.getElementById('cdw-filter-status').value;
+    var currency = document.getElementById('cdw-filter-currency').value;
+    var reference = document.getElementById('cdw-filter-reference').value.trim().toLowerCase();
+
+    filteredCdwTransactions = cdwTransactions.filter(function (transaction) {
+      var updatedDate = transaction.updatedTime.slice(0, 10);
+      return (!wallet || transaction.wallet === wallet) &&
+        (!transactionType || transaction.transactionType === transactionType) &&
+        (!dateFrom || updatedDate >= dateFrom) &&
+        (!dateTo || updatedDate <= dateTo) &&
+        (!cycle || transaction.cycle === cycle) &&
+        (!status || transaction.status === status) &&
+        (!currency || transaction.currency === currency) &&
+        (!reference || transaction.referenceId.toLowerCase().indexOf(reference) !== -1);
+    });
+    renderCdwTable(filteredCdwTransactions);
+  }
+
+  function clearCdwFilters() {
+    ['cdw-filter-wallet', 'cdw-filter-type', 'cdw-filter-date-from', 'cdw-filter-date-to',
+      'cdw-filter-cycle', 'cdw-filter-status', 'cdw-filter-currency',
+      'cdw-filter-reference'].forEach(function (id) {
+      document.getElementById(id).value = '';
+    });
+    filteredCdwTransactions = cdwTransactions.slice();
+    renderCdwTable(filteredCdwTransactions);
+  }
+
+  function downloadCdwCsv() {
+    var headers = ['Wallet', 'Transaction Type', 'Settlement Cycle', 'Transaction ID',
+      'From Wallet', 'To Wallet', 'Currency', 'Amount', 'Created Time', 'Last Updated Time', 'Status'];
+    var rows = filteredCdwTransactions.map(function (transaction) {
+      return [transaction.wallet, transaction.transactionType, transaction.cycle, transaction.id,
+        transaction.fromWallet, transaction.toWallet, transaction.currency, transaction.amount,
+        transaction.createdTime, transaction.updatedTime, transaction.status];
+    });
+    var csv = [headers].concat(rows).map(function (row) {
+      return row.map(function (value) {
+        return '"' + String(value).replace(/"/g, '""') + '"';
+      }).join(',');
+    }).join('\n');
+    var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = 'crypto-deposit-withdrawal-principal.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function onCdwSubmoduleChange() {
+    showCdwList();
+  }
+
+  function showCdwList() {
+    document.getElementById('cdw-list-section').classList.remove('hidden');
+    document.getElementById('cdw-detail-section').classList.add('hidden');
+  }
+
+  function showCdwDetail(transactionId) {
+    var transaction = cdwTransactions.find(function (item) { return item.id === transactionId; });
+    if (!transaction) return;
+
+    document.getElementById('cdw-detail-title-id').textContent = transaction.id;
+    document.getElementById('cdw-detail-cycle').textContent = transaction.cycle;
+    document.getElementById('cdw-detail-id').textContent = transaction.id;
+    document.getElementById('cdw-detail-from').textContent = transaction.detailFrom;
+    document.getElementById('cdw-detail-to').textContent = transaction.detailTo;
+    document.getElementById('cdw-detail-currency').textContent = transaction.currency;
+    document.getElementById('cdw-detail-amount').textContent = transaction.amount;
+    document.getElementById('cdw-detail-reference').textContent = transaction.referenceId;
+    document.getElementById('cdw-detail-gas-fee').textContent = '—';
+    document.getElementById('cdw-detail-gas-currency').textContent = '—';
+    document.getElementById('cdw-detail-created').textContent = transaction.createdTime;
+    document.getElementById('cdw-detail-updated').textContent = transaction.updatedTime;
+    document.getElementById('cdw-detail-status-field').innerHTML = cdwStatusHtml(transaction.status);
+
+    var headerStatus = document.getElementById('cdw-detail-status');
+    headerStatus.className = 'tag ' + cdwStatusClass(transaction.status);
+    headerStatus.textContent = transaction.status;
+
+    document.getElementById('cdw-status-history').innerHTML = transaction.history.map(function (record) {
+      return '<tr><td>' + record[0] + '</td><td>' + record[1] + '</td></tr>';
+    }).join('');
+
+    document.getElementById('cdw-list-section').classList.add('hidden');
+    document.getElementById('cdw-detail-section').classList.remove('hidden');
+  }
+
+  renderCdwTable(cdwTransactions);</script>
 </body>
 </html>
